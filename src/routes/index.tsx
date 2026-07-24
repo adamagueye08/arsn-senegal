@@ -15,11 +15,11 @@ export const Route = createFileRoute("/")({
         content:
           "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports.",
       },
-      { property: "og:title", content: "ARSN — Portail officiel" },
+      { property: "og:title", content: "Accueil — ARSN Sénégal" },
       {
         property: "og:description",
         content:
-          "Radioprotection, sûreté et sécurité nucléaires au Sénégal — actualités, avis et rapports.",
+          "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports.",
       },
     ],
   }),

@@ -80,21 +80,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ARSN — Autorité Sénégalaise de Radioprotection et de Sûreté Nucléaire" },
+      { title: "Accueil — ARSN Sénégal" },
       {
         name: "description",
         content:
-          "Site officiel de l'ARSN, autorité indépendante chargée de la radioprotection, de la sûreté et de la sécurité nucléaires au Sénégal.",
+          "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports.",
       },
       { name: "author", content: "ARSN Sénégal" },
-      { property: "og:title", content: "ARSN — Autorité Sénégalaise de Radioprotection" },
+      { property: "og:title", content: "Accueil — ARSN Sénégal" },
       {
         property: "og:description",
         content:
-          "Radioprotection, sûreté et sécurité nucléaires au Sénégal — actualités, réglementation, autorisations, inspections.",
+          "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Accueil — ARSN Sénégal" },
+      { name: "twitter:description", content: "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ec378b14-ae27-4372-a8b0-2cc3634e1aa7/id-preview-8476c260--83ccdffa-6114-405b-9ad5-b31b38d33633.lovable.app-1784911871592.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ec378b14-ae27-4372-a8b0-2cc3634e1aa7/id-preview-8476c260--83ccdffa-6114-405b-9ad5-b31b38d33633.lovable.app-1784911871592.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
