@@ -9,8 +9,56 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VideothequeRouteImport } from './routes/videotheque'
+import { Route as ReglementationRouteImport } from './routes/reglementation'
+import { Route as LArsnRouteImport } from './routes/l-arsn'
+import { Route as InspectionRouteImport } from './routes/inspection'
+import { Route as InformationRouteImport } from './routes/information'
+import { Route as DosimetrieRouteImport } from './routes/dosimetrie'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AutorisationRouteImport } from './routes/autorisation'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VideothequeRoute = VideothequeRouteImport.update({
+  id: '/videotheque',
+  path: '/videotheque',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglementationRoute = ReglementationRouteImport.update({
+  id: '/reglementation',
+  path: '/reglementation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LArsnRoute = LArsnRouteImport.update({
+  id: '/l-arsn',
+  path: '/l-arsn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InspectionRoute = InspectionRouteImport.update({
+  id: '/inspection',
+  path: '/inspection',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationRoute = InformationRouteImport.update({
+  id: '/information',
+  path: '/information',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DosimetrieRoute = DosimetrieRouteImport.update({
+  id: '/dosimetrie',
+  path: '/dosimetrie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutorisationRoute = AutorisationRouteImport.update({
+  id: '/autorisation',
+  path: '/autorisation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +67,144 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/autorisation': typeof AutorisationRoute
+  '/contact': typeof ContactRoute
+  '/dosimetrie': typeof DosimetrieRoute
+  '/information': typeof InformationRoute
+  '/inspection': typeof InspectionRoute
+  '/l-arsn': typeof LArsnRoute
+  '/reglementation': typeof ReglementationRoute
+  '/videotheque': typeof VideothequeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/autorisation': typeof AutorisationRoute
+  '/contact': typeof ContactRoute
+  '/dosimetrie': typeof DosimetrieRoute
+  '/information': typeof InformationRoute
+  '/inspection': typeof InspectionRoute
+  '/l-arsn': typeof LArsnRoute
+  '/reglementation': typeof ReglementationRoute
+  '/videotheque': typeof VideothequeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/autorisation': typeof AutorisationRoute
+  '/contact': typeof ContactRoute
+  '/dosimetrie': typeof DosimetrieRoute
+  '/information': typeof InformationRoute
+  '/inspection': typeof InspectionRoute
+  '/l-arsn': typeof LArsnRoute
+  '/reglementation': typeof ReglementationRoute
+  '/videotheque': typeof VideothequeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/autorisation'
+    | '/contact'
+    | '/dosimetrie'
+    | '/information'
+    | '/inspection'
+    | '/l-arsn'
+    | '/reglementation'
+    | '/videotheque'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/autorisation'
+    | '/contact'
+    | '/dosimetrie'
+    | '/information'
+    | '/inspection'
+    | '/l-arsn'
+    | '/reglementation'
+    | '/videotheque'
+  id:
+    | '__root__'
+    | '/'
+    | '/autorisation'
+    | '/contact'
+    | '/dosimetrie'
+    | '/information'
+    | '/inspection'
+    | '/l-arsn'
+    | '/reglementation'
+    | '/videotheque'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutorisationRoute: typeof AutorisationRoute
+  ContactRoute: typeof ContactRoute
+  DosimetrieRoute: typeof DosimetrieRoute
+  InformationRoute: typeof InformationRoute
+  InspectionRoute: typeof InspectionRoute
+  LArsnRoute: typeof LArsnRoute
+  ReglementationRoute: typeof ReglementationRoute
+  VideothequeRoute: typeof VideothequeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/videotheque': {
+      id: '/videotheque'
+      path: '/videotheque'
+      fullPath: '/videotheque'
+      preLoaderRoute: typeof VideothequeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglementation': {
+      id: '/reglementation'
+      path: '/reglementation'
+      fullPath: '/reglementation'
+      preLoaderRoute: typeof ReglementationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l-arsn': {
+      id: '/l-arsn'
+      path: '/l-arsn'
+      fullPath: '/l-arsn'
+      preLoaderRoute: typeof LArsnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspection': {
+      id: '/inspection'
+      path: '/inspection'
+      fullPath: '/inspection'
+      preLoaderRoute: typeof InspectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information': {
+      id: '/information'
+      path: '/information'
+      fullPath: '/information'
+      preLoaderRoute: typeof InformationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dosimetrie': {
+      id: '/dosimetrie'
+      path: '/dosimetrie'
+      fullPath: '/dosimetrie'
+      preLoaderRoute: typeof DosimetrieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/autorisation': {
+      id: '/autorisation'
+      path: '/autorisation'
+      fullPath: '/autorisation'
+      preLoaderRoute: typeof AutorisationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +217,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutorisationRoute: AutorisationRoute,
+  ContactRoute: ContactRoute,
+  DosimetrieRoute: DosimetrieRoute,
+  InformationRoute: InformationRoute,
+  InspectionRoute: InspectionRoute,
+  LArsnRoute: LArsnRoute,
+  ReglementationRoute: ReglementationRoute,
+  VideothequeRoute: VideothequeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
