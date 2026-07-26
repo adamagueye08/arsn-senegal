@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
