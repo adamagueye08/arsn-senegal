@@ -200,7 +200,15 @@ function Page() {
               <div key={f.t} className="p-8 bg-white ring-1 ring-black/5">
                 <h3 className="text-lg font-bold mb-3">{f.t}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">{f.d}</p>
-                <button className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-arsn-green hover:underline">
+                <button
+                  onClick={() =>
+                    toast.info(f.t, {
+                      description:
+                        "Le formulaire officiel sera bientôt disponible en téléchargement. Contactez l'ARSN pour l'obtenir dès à présent.",
+                    })
+                  }
+                  className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-arsn-green hover:underline"
+                >
                   <Download className="w-3.5 h-3.5" /> {c.download}
                 </button>
               </div>
