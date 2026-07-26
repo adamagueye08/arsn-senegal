@@ -137,6 +137,62 @@
   animation: arsn-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes arsn-blob-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(6vw, -4vh) scale(1.1); }
+  66% { transform: translate(-4vw, 5vh) scale(0.95); }
+}
+@keyframes arsn-blob-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-7vw, 3vh) scale(1.05); }
+  66% { transform: translate(5vw, -6vh) scale(1.1); }
+}
+@keyframes arsn-blob-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, 6vh) scale(1.15); }
+}
+
+.arsn-animated-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 800px at 10% -10%, color-mix(in oklab, var(--arsn-green) 8%, transparent), transparent 60%),
+    radial-gradient(900px 700px at 110% 10%, color-mix(in oklab, var(--arsn-yellow) 10%, transparent), transparent 60%),
+    var(--background);
+}
+.arsn-animated-bg::before,
+.arsn-animated-bg::after,
+.arsn-animated-bg > span {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.45;
+}
+.arsn-animated-bg::before {
+  width: 42vw; height: 42vw;
+  left: -8vw; top: -6vw;
+  background: color-mix(in oklab, var(--arsn-green) 55%, transparent);
+  animation: arsn-blob-a 22s ease-in-out infinite;
+}
+.arsn-animated-bg::after {
+  width: 38vw; height: 38vw;
+  right: -6vw; top: 20vh;
+  background: color-mix(in oklab, var(--arsn-yellow) 60%, transparent);
+  animation: arsn-blob-b 26s ease-in-out infinite;
+}
+.arsn-animated-bg > span {
+  width: 34vw; height: 34vw;
+  left: 40vw; bottom: -10vw;
+  background: color-mix(in oklab, var(--arsn-red) 40%, transparent);
+  animation: arsn-blob-c 30s ease-in-out infinite;
+  opacity: 0.28;
+}
+
+
 @layer base {
   * {
     border-color: var(--color-border);
