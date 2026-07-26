@@ -123,19 +123,26 @@ function Home() {
               </h4>
               <div className="space-y-6">
                 {["dec.1", "dec.2"].map((k) => (
-                  <div key={k} className="group cursor-pointer">
+                  <Link
+                    to="/information"
+                    key={k}
+                    className="group cursor-pointer block"
+                  >
                     <span className="text-[10px] text-white/40 block mb-1 font-mono">
                       {t(`${k}.ref`)}
                     </span>
                     <p className="text-sm font-medium group-hover:text-arsn-yellow transition-colors">
                       {t(`${k}.text`)}
                     </p>
-                  </div>
+                  </Link>
                 ))}
               </div>
-              <button className="w-full mt-8 py-3 border border-white/20 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-foreground transition-all">
+              <Link
+                to="/information"
+                className="w-full mt-8 py-3 border border-white/20 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-foreground transition-all inline-flex items-center justify-center"
+              >
                 {t("home.decisions.cta")}
-              </button>
+              </Link>
             </div>
 
             <div className="space-y-6">
@@ -143,7 +150,8 @@ function Home() {
                 {t("home.downloads.title")}
               </h4>
               {["rep.1", "rep.2"].map((k) => (
-                <div
+                <Link
+                  to="/information"
                   key={k}
                   className="flex items-start gap-4 p-4 border border-border hover:bg-white transition-colors cursor-pointer"
                 >
@@ -154,7 +162,7 @@ function Home() {
                     <h6 className="text-xs font-bold">{t(`${k}.title`)}</h6>
                     <p className="text-[10px] text-muted-foreground">{t(`${k}.meta`)}</p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -167,22 +175,24 @@ function Home() {
 function NewsCard({ image, n }: { image: string; n: 1 | 2 | 3 | 4 }) {
   const { t } = useLang();
   return (
-    <article className="space-y-4 group cursor-pointer">
-      <div className="w-full aspect-video overflow-hidden rounded-sm bg-slate-100">
-        <img
-          src={image}
-          alt=""
-          loading="lazy"
-          width={600}
-          height={400}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-      </div>
-      <span className="block font-mono text-[10px] text-muted-foreground">{t(`news.${n}.date`)}</span>
-      <h5 className="text-lg font-bold leading-tight group-hover:text-arsn-green transition-colors">
-        {t(`news.${n}.title`)}
-      </h5>
-      <p className="text-sm text-muted-foreground">{t(`news.${n}.excerpt`)}</p>
-    </article>
+    <Link to="/information" className="block">
+      <article className="space-y-4 group cursor-pointer">
+        <div className="w-full aspect-video overflow-hidden rounded-sm bg-slate-100">
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            width={600}
+            height={400}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <span className="block font-mono text-[10px] text-muted-foreground">{t(`news.${n}.date`)}</span>
+        <h5 className="text-lg font-bold leading-tight group-hover:text-arsn-green transition-colors">
+          {t(`news.${n}.title`)}
+        </h5>
+        <p className="text-sm text-muted-foreground">{t(`news.${n}.excerpt`)}</p>
+      </article>
+    </Link>
   );
 }

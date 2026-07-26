@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -83,7 +84,23 @@ function Page() {
           })}
         </div>
 
-        <form className="lg:col-span-3 p-8 bg-white ring-1 ring-black/5 space-y-4">
+        <form
+          className="lg:col-span-3 p-8 bg-white ring-1 ring-black/5 space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            toast.success(
+              lang === "en" ? "Message sent" : "Message envoyé",
+              {
+                description:
+                  lang === "en"
+                    ? "Thank you. The ARSN team will get back to you shortly."
+                    : "Merci. L'équipe de l'ARSN vous répondra dans les meilleurs délais.",
+              }
+            );
+            form.reset();
+          }}
+        >
           <div>
             <h2 className="text-2xl font-serif font-bold mb-2">{c.formTitle}</h2>
             <p className="text-sm text-muted-foreground">{c.formIntro}</p>
@@ -100,11 +117,12 @@ function Page() {
             </label>
             <textarea
               rows={5}
+              required
               className="w-full border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
             />
           </div>
           <button
-            type="button"
+            type="submit"
             className="px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-sm"
           >
             {c.send}
