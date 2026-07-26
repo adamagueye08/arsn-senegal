@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
 import { Activity, Download } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dosimetrie")({
   head: () => ({
