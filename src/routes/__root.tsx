@@ -145,6 +145,7 @@ function RootComponent() {
             <Outlet />
           </main>
           <SiteFooter />
+          <Toaster position="top-right" richColors />
         </div>
       </LanguageProvider>
     </QueryClientProvider>
