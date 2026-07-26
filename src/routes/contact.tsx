@@ -90,10 +90,10 @@ function Page() {
             e.preventDefault();
             const form = e.currentTarget;
             toast.success(
-              c.lang === "en" ? "Message sent" : "Message envoyé",
+              lang === "en" ? "Message sent" : "Message envoyé",
               {
                 description:
-                  c.lang === "en"
+                  lang === "en"
                     ? "Thank you. The ARSN team will get back to you shortly."
                     : "Merci. L'équipe de l'ARSN vous répondra dans les meilleurs délais.",
               }
