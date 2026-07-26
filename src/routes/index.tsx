@@ -175,22 +175,24 @@ function Home() {
 function NewsCard({ image, n }: { image: string; n: 1 | 2 | 3 | 4 }) {
   const { t } = useLang();
   return (
-    <article className="space-y-4 group cursor-pointer">
-      <div className="w-full aspect-video overflow-hidden rounded-sm bg-slate-100">
-        <img
-          src={image}
-          alt=""
-          loading="lazy"
-          width={600}
-          height={400}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-      </div>
-      <span className="block font-mono text-[10px] text-muted-foreground">{t(`news.${n}.date`)}</span>
-      <h5 className="text-lg font-bold leading-tight group-hover:text-arsn-green transition-colors">
-        {t(`news.${n}.title`)}
-      </h5>
-      <p className="text-sm text-muted-foreground">{t(`news.${n}.excerpt`)}</p>
-    </article>
+    <Link to="/information" className="block">
+      <article className="space-y-4 group cursor-pointer">
+        <div className="w-full aspect-video overflow-hidden rounded-sm bg-slate-100">
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            width={600}
+            height={400}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <span className="block font-mono text-[10px] text-muted-foreground">{t(`news.${n}.date`)}</span>
+        <h5 className="text-lg font-bold leading-tight group-hover:text-arsn-green transition-colors">
+          {t(`news.${n}.title`)}
+        </h5>
+        <p className="text-sm text-muted-foreground">{t(`news.${n}.excerpt`)}</p>
+      </article>
+    </Link>
   );
 }
