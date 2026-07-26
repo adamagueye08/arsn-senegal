@@ -218,7 +218,15 @@ function Page() {
           {[c.services.a, c.services.b].map((label) => (
             <div key={label} className="p-8 bg-foreground text-white flex items-center justify-between gap-6 rounded-sm">
               <span className="text-sm font-medium">{label}</span>
-              <button className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-arsn-yellow hover:underline shrink-0">
+              <button
+                onClick={() =>
+                  toast.info(label, {
+                    description:
+                      "Ce document sera bientôt disponible. Veuillez contacter le service dosimétrie de l'ARSN.",
+                  })
+                }
+                className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-arsn-yellow hover:underline shrink-0"
+              >
                 <Download className="w-3.5 h-3.5" /> {c.services.cta}
               </button>
             </div>
