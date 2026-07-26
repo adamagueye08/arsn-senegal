@@ -137,7 +137,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-arsn-yellow/30">
+        <div className="relative min-h-screen flex flex-col bg-transparent text-foreground selection:bg-arsn-yellow/30">
+          <div className="arsn-animated-bg" aria-hidden="true"><span /></div>
           <SiteHeader />
           <main className="flex-1">
             <Outlet />

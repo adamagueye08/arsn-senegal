@@ -55,10 +55,13 @@ function Home() {
                 {t("home.hero.desc")}
               </p>
               <div className="pt-4">
-                <button className="px-8 py-4 bg-foreground text-white font-semibold text-sm hover:bg-foreground/90 transition-all rounded-sm flex items-center gap-3 group">
+                <Link
+                  to="/information"
+                  className="inline-flex px-8 py-4 bg-foreground text-white font-semibold text-sm hover:bg-foreground/90 transition-all rounded-sm items-center gap-3 group"
+                >
                   {t("home.hero.cta")}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </Link>
               </div>
             </div>
           </div>
