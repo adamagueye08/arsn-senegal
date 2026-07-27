@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
-import { Activity, Download } from "lucide-react";
-import { toast } from "sonner";
+import { Activity } from "lucide-react";
+import { DownloadButton } from "@/components/site/DownloadButton";
+import { DOCS } from "@/lib/documents";
+
 
 export const Route = createFileRoute("/dosimetrie")({
   head: () => ({
@@ -215,23 +217,19 @@ function Page() {
         </section>
 
         <section className="grid md:grid-cols-2 gap-4">
-          {[c.services.a, c.services.b].map((label) => (
+          {[
+            { label: c.services.a, doc: DOCS.formDosimetrie },
+            { label: c.services.b, doc: DOCS.guideDosimetrie },
+          ].map(({ label, doc }) => (
             <div key={label} className="p-8 bg-foreground text-white flex items-center justify-between gap-6 rounded-sm">
               <span className="text-sm font-medium">{label}</span>
-              <button
-                onClick={() =>
-                  toast.info(label, {
-                    description:
-                      "Ce document sera bientôt disponible. Veuillez contacter le service dosimétrie de l'ARSN.",
-                  })
-                }
-                className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-arsn-yellow hover:underline shrink-0"
-              >
-                <Download className="w-3.5 h-3.5" /> {c.services.cta}
-              </button>
+              <DownloadButton doc={doc} variant="ghost">
+                {c.services.cta}
+              </DownloadButton>
             </div>
           ))}
         </section>
+
       </div>
     </>
   );
