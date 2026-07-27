@@ -66,7 +66,7 @@ export function SiteHeader() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/arsn-logo.png"
+              src="/arsn-logo.svg"
               alt="Logo ARSN"
               width={160}
               height={56}
