@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
-import { Download } from "lucide-react";
-import { toast } from "sonner";
+import { DownloadButton } from "@/components/site/DownloadButton";
+import { DOCS, type DocKey } from "@/lib/documents";
+
 
 export const Route = createFileRoute("/autorisation")({
   head: () => ({
@@ -67,20 +68,25 @@ const FR = {
     {
       t: "Importation",
       d: "L'importation des sources radioactives est une activité hautement encadrée, nécessitant une préparation minutieuse et une conformité stricte aux réglementations en vigueur.",
+      doc: "formImport" as DocKey,
     },
     {
       t: "Exportation",
       d: "L'exportation des sources radioactives est une opération sensible, nécessitant une préparation minutieuse et une conformité stricte aux réglementations nationales et internationales.",
+      doc: "formExport" as DocKey,
     },
     {
       t: "Détention et utilisation",
       d: "La détention et l'utilisation des sources radioactives sont strictement encadrées pour assurer la protection des travailleurs, du public et de l'environnement.",
+      doc: "formDetention" as DocKey,
     },
     {
       t: "Transport",
       d: "Le transport des matières radioactives est une activité hautement réglementée, nécessitant des mesures strictes pour assurer la sécurité des personnes, des biens et de l'environnement.",
+      doc: "formTransport" as DocKey,
     },
   ],
+
   download: "Télécharger",
 };
 
