@@ -1,7 +1,5 @@
 import { useLang } from "@/lib/i18n";
 import { Facebook, Twitter, Linkedin } from "lucide-react";
-import arsnLogo from "@/assets/arsn-logo.png.asset.json";
-
 
 export function SiteFooter() {
   const { t } = useLang();
@@ -12,7 +10,7 @@ export function SiteFooter() {
           <div className="lg:col-span-2">
             <div className="mb-6">
               <img
-                src={arsnLogo.url}
+                src="/LOGO-ARSN-1-2048x645.png"
                 alt="Logo ARSN"
                 width={220}
                 height={72}
