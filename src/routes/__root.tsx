@@ -97,9 +97,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Accueil — ARSN Sénégal" },
-      { name: "twitter:description", content: "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ec378b14-ae27-4372-a8b0-2cc3634e1aa7/id-preview-8476c260--83ccdffa-6114-405b-9ad5-b31b38d33633.lovable.app-1784911871592.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ec378b14-ae27-4372-a8b0-2cc3634e1aa7/id-preview-8476c260--83ccdffa-6114-405b-9ad5-b31b38d33633.lovable.app-1784911871592.png" },
+      { name: "twitter:description", content: "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapport" },
+      { property: "og:image", content: "/arsn-logo.png" },
+      { name: "twitter:image", content: "/arsn-logo.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
