@@ -218,6 +218,7 @@
 @layer base {
   * {
     border-color: var(--color-border);
+   
   }
 
   body {
@@ -225,4 +226,5 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+   #lovable-badge { display: none !important; }
 }
