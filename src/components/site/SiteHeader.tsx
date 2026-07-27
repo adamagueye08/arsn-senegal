@@ -2,6 +2,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import arsnLogo from "@/assets/arsn-logo.png.asset.json";
+
 
 const NAV = [
   { to: "/", key: "nav.home" },
@@ -64,21 +66,17 @@ export function SiteHeader() {
       {/* Main nav */}
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-20">
-          <Link to="/" className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-foreground rounded flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-arsn-green rounded-full relative">
-                <div className="absolute inset-0 border-t-2 border-arsn-red rotate-45" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tighter leading-none">ARSN</h1>
-              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight max-w-[200px]">
-                {lang === "fr"
-                  ? "Autorité Sénégalaise de Radioprotection et de Sûreté Nucléaire"
-                  : "Senegalese Radiation Protection & Nuclear Safety Authority"}
-              </p>
-            </div>
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src={arsnLogo.url}
+              alt="Logo ARSN"
+              width={160}
+              height={56}
+              className="h-12 md:h-14 w-auto object-contain"
+            />
+            <span className="sr-only">ARSN — Autorité Sénégalaise de Radioprotection et de Sûreté Nucléaire</span>
           </Link>
+
 
           <div className="hidden xl:flex items-center gap-6">
             {NAV.map((item) => {

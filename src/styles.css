@@ -166,8 +166,9 @@
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(1200px 800px at 10% -10%, color-mix(in oklab, var(--arsn-green) 8%, transparent), transparent 60%),
-    radial-gradient(900px 700px at 110% 10%, color-mix(in oklab, var(--arsn-yellow) 10%, transparent), transparent 60%),
+    radial-gradient(1400px 900px at 10% -10%, color-mix(in oklab, var(--arsn-blue) 22%, transparent), transparent 60%),
+    radial-gradient(1000px 800px at 110% 10%, color-mix(in oklab, var(--arsn-blue-light) 25%, transparent), transparent 60%),
+    radial-gradient(900px 700px at 50% 110%, color-mix(in oklab, var(--arsn-blue) 15%, transparent), transparent 60%),
     var(--background);
 }
 .arsn-animated-bg::before,
@@ -175,29 +176,43 @@
 .arsn-animated-bg > span {
   content: "";
   position: absolute;
-  border-radius: 9999px;
-  filter: blur(80px);
-  opacity: 0.45;
+  pointer-events: none;
 }
+/* Soft nuclear-blue haze */
 .arsn-animated-bg::before {
-  width: 42vw; height: 42vw;
+  width: 46vw; height: 46vw;
   left: -8vw; top: -6vw;
-  background: color-mix(in oklab, var(--arsn-green) 55%, transparent);
-  animation: arsn-blob-a 22s ease-in-out infinite;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--arsn-blue) 45%, transparent);
+  filter: blur(90px);
+  opacity: 0.35;
+  animation: arsn-blob-a 26s ease-in-out infinite;
 }
 .arsn-animated-bg::after {
-  width: 38vw; height: 38vw;
-  right: -6vw; top: 20vh;
-  background: color-mix(in oklab, var(--arsn-yellow) 60%, transparent);
-  animation: arsn-blob-b 26s ease-in-out infinite;
+  width: 40vw; height: 40vw;
+  right: -6vw; top: 25vh;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--arsn-blue-light) 55%, transparent);
+  filter: blur(90px);
+  opacity: 0.35;
+  animation: arsn-blob-b 30s ease-in-out infinite;
 }
+/* Atomic orbits pattern layer (SVG) — evokes electrons circling a nucleus */
 .arsn-animated-bg > span {
-  width: 34vw; height: 34vw;
-  left: 40vw; bottom: -10vw;
-  background: color-mix(in oklab, var(--arsn-red) 40%, transparent);
-  animation: arsn-blob-c 30s ease-in-out infinite;
-  opacity: 0.28;
+  inset: 0;
+  width: 100%; height: 100%;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'><g fill='none' stroke='%231e3a8a' stroke-opacity='0.10' stroke-width='1.2'><ellipse cx='400' cy='400' rx='320' ry='120'/><ellipse cx='400' cy='400' rx='320' ry='120' transform='rotate(60 400 400)'/><ellipse cx='400' cy='400' rx='320' ry='120' transform='rotate(120 400 400)'/></g><g fill='%231e3a8a' fill-opacity='0.18'><circle cx='400' cy='400' r='10'/><circle cx='720' cy='400' r='4'/><circle cx='240' cy='262' r='3.5'/><circle cx='560' cy='538' r='3.5'/></g></svg>");
+  background-repeat: repeat;
+  background-size: 640px 640px;
+  opacity: 0.55;
+  animation: arsn-orbit-drift 60s linear infinite;
 }
+@keyframes arsn-orbit-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 640px 640px; }
+}
+
 
 
 @layer base {
