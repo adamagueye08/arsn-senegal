@@ -5,6 +5,8 @@ import heroLab from "@/assets/hero-lab.jpg";
 import newsConference from "@/assets/news-conference.jpg";
 import newsVisit from "@/assets/news-visit.jpg";
 import newsRadiology from "@/assets/news-radiology.jpg";
+import { NewsSlider } from "@/components/site/NewsSlider";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -75,6 +77,9 @@ function Home() {
             />
           </div>
         </section>
+        {/* Actualités défilantes */}
+        <NewsSlider />
+
 
         {/* Quick Access */}
         <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16 md:mb-20 animate-reveal">

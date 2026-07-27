@@ -1,5 +1,7 @@
 import { useLang } from "@/lib/i18n";
 import { Facebook, Twitter, Linkedin } from "lucide-react";
+import arsnLogo from "@/assets/arsn-logo.png.asset.json";
+
 
 export function SiteFooter() {
   const { t } = useLang();
@@ -8,15 +10,19 @@ export function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid lg:grid-cols-4 gap-12 mb-16">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-10 h-10 bg-foreground rounded flex items-center justify-center">
-                <div className="w-4 h-4 border-2 border-arsn-green rounded-full" />
-              </div>
-              <h2 className="text-lg font-serif italic">ARSN Sénégal</h2>
+            <div className="mb-6">
+              <img
+                src={arsnLogo.url}
+                alt="Logo ARSN"
+                width={220}
+                height={72}
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed mb-6">
               {t("footer.about")}
             </p>
+
             <div className="flex gap-3">
               <a
                 href="#"
