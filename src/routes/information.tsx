@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
+import { DownloadButton } from "@/components/site/DownloadButton";
+import { DOCS } from "@/lib/documents";
+import { FileText } from "lucide-react";
 import newsConference from "@/assets/news-conference.jpg";
 import newsVisit from "@/assets/news-visit.jpg";
 import newsRadiology from "@/assets/news-radiology.jpg";
+
 
 export const Route = createFileRoute("/information")({
   head: () => ({
@@ -179,6 +183,48 @@ function Page() {
           </article>
         ))}
       </div>
+
+      {/* Publications & documents officiels */}
+      <div className="border-t border-border bg-white/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-16">
+          <h2 className="text-2xl font-serif font-bold mb-2">
+            {lang === "fr" ? "Publications & documents officiels" : "Publications & official documents"}
+          </h2>
+          <p className="text-sm text-muted-foreground mb-8">
+            {lang === "fr"
+              ? "Rapports, guides et formulaires téléchargeables au format PDF."
+              : "Reports, guides and forms available as PDF downloads."}
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              DOCS.rapportAnnuel,
+              DOCS.rapportInspection,
+              DOCS.guideDosimetrie,
+              DOCS.formImport,
+              DOCS.formExport,
+              DOCS.formTransport,
+            ].map((doc) => (
+              <div key={doc.filename} className="p-6 bg-white ring-1 ring-black/5 hover:ring-arsn-blue/40 transition-all flex flex-col gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-arsn-blue/10 text-arsn-blue grid place-items-center shrink-0">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold leading-snug">{doc.label}</h3>
+                    <p className="text-[10px] font-mono text-muted-foreground mt-1 uppercase tracking-widest">
+                      PDF · {(doc.size / 1024).toFixed(0)} KB
+                    </p>
+                  </div>
+                </div>
+                <DownloadButton doc={doc}>
+                  {lang === "fr" ? "Télécharger" : "Download"}
+                </DownloadButton>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </>
   );
 }
+
