@@ -2,8 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import arsnLogo from "@/assets/arsn-logo.png.asset.json";
-
 
 const NAV = [
   { to: "/", key: "nav.home" },
@@ -68,7 +66,7 @@ export function SiteHeader() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src={arsnLogo.url}
+              src="/arsn-logo.png"
               alt="Logo ARSN"
               width={160}
               height={56}
