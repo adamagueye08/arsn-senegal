@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight, FileText, Download } from "lucide-react";
+import { toast } from "sonner";
 import heroLab from "@/assets/hero-lab.jpg";
 import newsConference from "@/assets/news-conference.jpg";
 import newsVisit from "@/assets/news-visit.jpg";
 import newsRadiology from "@/assets/news-radiology.jpg";
 import { NewsSlider } from "@/components/site/NewsSlider";
+import { DOCS, formatSize, type DocMeta } from "@/lib/documents";
+
 
 
 export const Route = createFileRoute("/")({
@@ -57,14 +60,23 @@ function Home() {
                 {t("home.hero.desc")}
               </p>
               <div className="pt-4">
-                <Link
-                  to="/information"
+                <a
+                  href={DOCS.rapportAnnuel.url}
+                  download={DOCS.rapportAnnuel.filename}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    toast.success("Téléchargement lancé", {
+                      description: `${DOCS.rapportAnnuel.label} · ${formatSize(DOCS.rapportAnnuel.size)}`,
+                    })
+                  }
                   className="inline-flex px-8 py-4 bg-foreground text-white font-semibold text-sm hover:bg-foreground/90 transition-all rounded-sm items-center gap-3 group"
                 >
                   {t("home.hero.cta")}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                </a>
               </div>
+
             </div>
           </div>
           <div className="lg:col-span-4">
@@ -154,21 +166,38 @@ function Home() {
               <h4 className="text-sm font-mono uppercase tracking-[0.2em] border-b border-border pb-4">
                 {t("home.downloads.title")}
               </h4>
-              {["rep.1", "rep.2"].map((k) => (
-                <Link
-                  to="/information"
+              {(
+                [
+                  { k: "rep.1", doc: DOCS.rapportAnnuel },
+                  { k: "rep.2", doc: DOCS.rapportInspection },
+                ] as { k: string; doc: DocMeta }[]
+              ).map(({ k, doc }) => (
+                <a
                   key={k}
-                  className="flex items-start gap-4 p-4 border border-border hover:bg-white transition-colors cursor-pointer"
+                  href={doc.url}
+                  download={doc.filename}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    toast.success("Téléchargement lancé", {
+                      description: `${doc.label} · ${formatSize(doc.size)}`,
+                    })
+                  }
+                  className="flex items-start gap-4 p-4 border border-border hover:bg-white hover:border-arsn-blue/40 transition-colors cursor-pointer group"
                 >
-                  <div className="w-10 h-10 bg-slate-100 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 bg-arsn-blue/10 text-arsn-blue flex items-center justify-center shrink-0 group-hover:bg-arsn-blue group-hover:text-white transition-colors">
                     <FileText className="w-4 h-4" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h6 className="text-xs font-bold">{t(`${k}.title`)}</h6>
-                    <p className="text-[10px] text-muted-foreground">{t(`${k}.meta`)}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {t(`${k}.meta`)} · PDF · {formatSize(doc.size)}
+                    </p>
                   </div>
-                </Link>
+                  <Download className="w-4 h-4 text-muted-foreground group-hover:text-arsn-blue shrink-0" />
+                </a>
               ))}
+
             </div>
           </div>
         </section>
