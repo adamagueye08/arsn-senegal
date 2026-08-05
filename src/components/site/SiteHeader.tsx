@@ -13,6 +13,7 @@ const NAV = [
   { to: "/information", key: "nav.information" },
   { to: "/videotheque", key: "nav.videotheque" },
   { to: "/contact", key: "nav.contact" },
+  { to: "/espace-demandeur", key: "nav.account" },
 ] as const;
 
 export function SiteHeader() {

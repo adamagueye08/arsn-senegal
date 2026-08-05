@@ -23,7 +23,7 @@ export const translations: Translations = {
     "nav.information": "Information",
     "nav.videotheque": "Vidéothèque",
     "nav.contact": "Contact",
-
+    "nav.account": "Espace demandeur",
     // Home hero
     "home.hero.tag": "Communiqué Officiel",
     "home.hero.title.1": "Renforcement de la surveillance du",
@@ -174,7 +174,7 @@ export const translations: Translations = {
     "nav.information": "News",
     "nav.videotheque": "Video Library",
     "nav.contact": "Contact",
-
+    "nav.account": "Applicant Area",
     "home.hero.tag": "Official Statement",
     "home.hero.title.1": "Strengthening oversight of the national",
     "home.hero.title.emph": "radiological infrastructure",

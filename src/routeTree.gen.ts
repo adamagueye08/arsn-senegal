@@ -9,49 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VideothequeRouteImport } from './routes/videotheque'
-import { Route as ReglementationRouteImport } from './routes/reglementation'
-import { Route as LArsnRouteImport } from './routes/l-arsn'
-import { Route as InspectionRouteImport } from './routes/inspection'
-import { Route as InformationRouteImport } from './routes/information'
-import { Route as DosimetrieRouteImport } from './routes/dosimetrie'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AutorisationRouteImport } from './routes/autorisation'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AutorisationRouteImport } from './routes/autorisation'
+import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DosimetrieRouteImport } from './routes/dosimetrie'
+import { Route as EspaceDemandeurRouteImport } from './routes/espace-demandeur'
+import { Route as InformationRouteImport } from './routes/information'
+import { Route as InspectionRouteImport } from './routes/inspection'
+import { Route as LArsnRouteImport } from './routes/l-arsn'
+import { Route as ReglementationRouteImport } from './routes/reglementation'
+import { Route as VideothequeRouteImport } from './routes/videotheque'
 
-const VideothequeRoute = VideothequeRouteImport.update({
-  id: '/videotheque',
-  path: '/videotheque',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReglementationRoute = ReglementationRouteImport.update({
-  id: '/reglementation',
-  path: '/reglementation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LArsnRoute = LArsnRouteImport.update({
-  id: '/l-arsn',
-  path: '/l-arsn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InspectionRoute = InspectionRouteImport.update({
-  id: '/inspection',
-  path: '/inspection',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InformationRoute = InformationRouteImport.update({
-  id: '/information',
-  path: '/information',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DosimetrieRoute = DosimetrieRouteImport.update({
-  id: '/dosimetrie',
-  path: '/dosimetrie',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutorisationRoute = AutorisationRouteImport.update({
@@ -59,17 +37,60 @@ const AutorisationRoute = AutorisationRouteImport.update({
   path: '/autorisation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ConnexionRoute = ConnexionRouteImport.update({
+  id: '/connexion',
+  path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DosimetrieRoute = DosimetrieRouteImport.update({
+  id: '/dosimetrie',
+  path: '/dosimetrie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EspaceDemandeurRoute = EspaceDemandeurRouteImport.update({
+  id: '/espace-demandeur',
+  path: '/espace-demandeur',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationRoute = InformationRouteImport.update({
+  id: '/information',
+  path: '/information',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InspectionRoute = InspectionRouteImport.update({
+  id: '/inspection',
+  path: '/inspection',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LArsnRoute = LArsnRouteImport.update({
+  id: '/l-arsn',
+  path: '/l-arsn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglementationRoute = ReglementationRouteImport.update({
+  id: '/reglementation',
+  path: '/reglementation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideothequeRoute = VideothequeRouteImport.update({
+  id: '/videotheque',
+  path: '/videotheque',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/autorisation': typeof AutorisationRoute
+  '/connexion': typeof ConnexionRoute
   '/contact': typeof ContactRoute
   '/dosimetrie': typeof DosimetrieRoute
+  '/espace-demandeur': typeof EspaceDemandeurRoute
   '/information': typeof InformationRoute
   '/inspection': typeof InspectionRoute
   '/l-arsn': typeof LArsnRoute
@@ -78,9 +99,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/autorisation': typeof AutorisationRoute
+  '/connexion': typeof ConnexionRoute
   '/contact': typeof ContactRoute
   '/dosimetrie': typeof DosimetrieRoute
+  '/espace-demandeur': typeof EspaceDemandeurRoute
   '/information': typeof InformationRoute
   '/inspection': typeof InspectionRoute
   '/l-arsn': typeof LArsnRoute
@@ -90,9 +114,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/autorisation': typeof AutorisationRoute
+  '/connexion': typeof ConnexionRoute
   '/contact': typeof ContactRoute
   '/dosimetrie': typeof DosimetrieRoute
+  '/espace-demandeur': typeof EspaceDemandeurRoute
   '/information': typeof InformationRoute
   '/inspection': typeof InspectionRoute
   '/l-arsn': typeof LArsnRoute
@@ -103,9 +130,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/autorisation'
+    | '/connexion'
     | '/contact'
     | '/dosimetrie'
+    | '/espace-demandeur'
     | '/information'
     | '/inspection'
     | '/l-arsn'
@@ -114,9 +144,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/autorisation'
+    | '/connexion'
     | '/contact'
     | '/dosimetrie'
+    | '/espace-demandeur'
     | '/information'
     | '/inspection'
     | '/l-arsn'
@@ -125,9 +158,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/autorisation'
+    | '/connexion'
     | '/contact'
     | '/dosimetrie'
+    | '/espace-demandeur'
     | '/information'
     | '/inspection'
     | '/l-arsn'
@@ -137,9 +173,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AutorisationRoute: typeof AutorisationRoute
+  ConnexionRoute: typeof ConnexionRoute
   ContactRoute: typeof ContactRoute
   DosimetrieRoute: typeof DosimetrieRoute
+  EspaceDemandeurRoute: typeof EspaceDemandeurRoute
   InformationRoute: typeof InformationRoute
   InspectionRoute: typeof InspectionRoute
   LArsnRoute: typeof LArsnRoute
@@ -149,53 +188,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/videotheque': {
-      id: '/videotheque'
-      path: '/videotheque'
-      fullPath: '/videotheque'
-      preLoaderRoute: typeof VideothequeRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reglementation': {
-      id: '/reglementation'
-      path: '/reglementation'
-      fullPath: '/reglementation'
-      preLoaderRoute: typeof ReglementationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/l-arsn': {
-      id: '/l-arsn'
-      path: '/l-arsn'
-      fullPath: '/l-arsn'
-      preLoaderRoute: typeof LArsnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/inspection': {
-      id: '/inspection'
-      path: '/inspection'
-      fullPath: '/inspection'
-      preLoaderRoute: typeof InspectionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/information': {
-      id: '/information'
-      path: '/information'
-      fullPath: '/information'
-      preLoaderRoute: typeof InformationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dosimetrie': {
-      id: '/dosimetrie'
-      path: '/dosimetrie'
-      fullPath: '/dosimetrie'
-      preLoaderRoute: typeof DosimetrieRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/autorisation': {
@@ -205,11 +209,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutorisationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/connexion': {
+      id: '/connexion'
+      path: '/connexion'
+      fullPath: '/connexion'
+      preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dosimetrie': {
+      id: '/dosimetrie'
+      path: '/dosimetrie'
+      fullPath: '/dosimetrie'
+      preLoaderRoute: typeof DosimetrieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/espace-demandeur': {
+      id: '/espace-demandeur'
+      path: '/espace-demandeur'
+      fullPath: '/espace-demandeur'
+      preLoaderRoute: typeof EspaceDemandeurRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information': {
+      id: '/information'
+      path: '/information'
+      fullPath: '/information'
+      preLoaderRoute: typeof InformationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspection': {
+      id: '/inspection'
+      path: '/inspection'
+      fullPath: '/inspection'
+      preLoaderRoute: typeof InspectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/l-arsn': {
+      id: '/l-arsn'
+      path: '/l-arsn'
+      fullPath: '/l-arsn'
+      preLoaderRoute: typeof LArsnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglementation': {
+      id: '/reglementation'
+      path: '/reglementation'
+      fullPath: '/reglementation'
+      preLoaderRoute: typeof ReglementationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videotheque': {
+      id: '/videotheque'
+      path: '/videotheque'
+      fullPath: '/videotheque'
+      preLoaderRoute: typeof VideothequeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -217,9 +277,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AutorisationRoute: AutorisationRoute,
+  ConnexionRoute: ConnexionRoute,
   ContactRoute: ContactRoute,
   DosimetrieRoute: DosimetrieRoute,
+  EspaceDemandeurRoute: EspaceDemandeurRoute,
   InformationRoute: InformationRoute,
   InspectionRoute: InspectionRoute,
   LArsnRoute: LArsnRoute,
@@ -229,3 +292,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
