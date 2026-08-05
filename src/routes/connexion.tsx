@@ -68,9 +68,12 @@ function Page() {
   }
 
   return (
-    <div className="min-h-[70vh] bg-muted/30 flex items-center justify-center py-16 px-4">
-      <div className="w-full max-w-md p-8 bg-white ring-1 ring-black/5">
-        <h1 className="text-2xl font-serif font-bold mb-1">Connexion</h1>
+    <div className="min-h-[70vh] bg-gradient-to-b from-secondary/40 to-background flex items-center justify-center py-16 px-4">
+      <div className="w-full max-w-md p-8 bg-white ring-1 ring-black/5 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg animate-reveal">
+        <span className="inline-block px-3 py-1 bg-arsn-green/10 text-arsn-green text-[10px] font-bold tracking-widest uppercase rounded mb-4">
+          ARSN
+        </span>
+        <h1 className="text-3xl font-serif mb-1">Connexion</h1>
         <p className="text-sm text-muted-foreground mb-6">
           Espace demandeurs et agents ARSN — un seul point de connexion.
         </p>
@@ -79,8 +82,8 @@ function Page() {
           <button
             type="button"
             onClick={() => setTab("login")}
-            className={`px-4 py-2 text-sm font-semibold rounded-sm ${
-              tab === "login" ? "bg-foreground text-white" : "bg-white ring-1 ring-black/10"
+            className={`px-4 py-2 text-sm font-semibold rounded-lg ${
+              tab === "login" ? "bg-foreground text-white" : "bg-white ring-1 ring-black/10 hover:bg-secondary transition-colors duration-200"
             }`}
           >
             Se connecter
@@ -88,8 +91,8 @@ function Page() {
           <button
             type="button"
             onClick={() => setTab("register")}
-            className={`px-4 py-2 text-sm font-semibold rounded-sm ${
-              tab === "register" ? "bg-foreground text-white" : "bg-white ring-1 ring-black/10"
+            className={`px-4 py-2 text-sm font-semibold rounded-lg ${
+              tab === "register" ? "bg-foreground text-white" : "bg-white ring-1 ring-black/10 hover:bg-secondary transition-colors duration-200"
             }`}
           >
             Créer un compte
@@ -109,7 +112,7 @@ function Page() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-sm disabled:opacity-50"
+              className="w-full px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
             >
               Se connecter
             </button>
@@ -131,7 +134,7 @@ function Page() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-sm disabled:opacity-50"
+              className="w-full px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
             >
               Créer mon compte
             </button>

@@ -157,7 +157,7 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
   }
 
   return (
-    <div className="p-8 bg-white ring-1 ring-black/5 space-y-8">
+    <div className="p-8 bg-white ring-1 ring-black/5 shadow-sm hover:shadow-md transition-shadow duration-300 space-y-8">
       <div className="flex items-center justify-between">
         <p className="text-sm">
           {c.welcome} <strong>{user.prenom} {user.nom}</strong>
@@ -187,7 +187,7 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
           <button
             type="submit"
             disabled={busy || !selectedType}
-            className="px-6 py-3 bg-arsn-green text-white text-sm font-semibold hover:opacity-90 rounded-sm disabled:opacity-50 h-fit"
+            className="px-6 py-3 bg-arsn-green text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 h-fit transition-all duration-200 hover:shadow-md active:scale-[0.98]"
           >
             {c.submitBtn}
           </button>
@@ -202,8 +202,12 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
           <p className="text-sm text-muted-foreground">{c.noRequests}</p>
         ) : (
           <ul className="space-y-2">
-            {demandes.map((d) => (
-              <li key={d.id} className="flex items-center justify-between p-4 ring-1 ring-black/5 text-sm">
+            {demandes.map((d, i) => (
+              <li
+                key={d.id}
+                style={{ animationDelay: `${i * 60}ms` }}
+                className="flex items-center justify-between p-4 ring-1 ring-black/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm rounded-lg animate-reveal"
+              >
                 <span className="font-mono">{d.numero}</span>
                 <span className="text-muted-foreground">{d.typeAutorisation?.nom}</span>
                 <span className="font-semibold">
