@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
 import { DownloadButton } from "@/components/site/DownloadButton";
@@ -33,16 +33,16 @@ const FR = {
     "Une « autorisation » est une permission accordée par écrit à un exploitant par l'ARSN pour exécuter des activités non exemptées et mettant en jeu des rayonnements ionisants. L'autorisation est délivrée sur la base d'une évaluation de la sûreté et de la sécurité et assortie de conditions et prescriptions particulières que l'exploitant doit respecter.",
   processTitle: "Processus de demande d'autorisation",
   processBody:
-    "Toute personne physique ou morale souhaitant exercer une activité impliquant des matières nucléaires, des sources de rayonnements ionisants ou toute autre installation nécessitant un contrôle réglementaire doit obtenir une autorisation préalable de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires (ARSN).",
+    "Toute personne physique ou morale souhaitant exercer une activité impliquant des matières nucléaires, des sources de rayonnements ionisants ou toute autre installation nécessitant un contrôle réglementaire doit obtenir une autorisation préalable de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires (ARSN). L'ensemble du processus — dépôt du dossier, suivi et échanges avec l'instructeur — se fait désormais en ligne depuis l'espace demandeur.",
   stepsTitle: "Étapes de la procédure",
   steps: [
     {
-      t: "Constitution du dossier",
-      d: "Le demandeur télécharge le formulaire correspondant à son activité (importation, exportation, détention et utilisation, transport) et rassemble les pièces justificatives requises.",
+      t: "Créer un compte demandeur",
+      d: "Le demandeur crée un compte sur l'espace demandeur en ligne et choisit le type d'autorisation correspondant à son activité (importation, exportation, détention et utilisation, transport).",
     },
     {
-      t: "Dépôt de la demande",
-      d: "Le dossier complet est adressé à l'ARSN. Un accusé de réception est transmis au demandeur.",
+      t: "Dépôt de la demande en ligne",
+      d: "La demande est soumise directement depuis l'espace demandeur, avec les pièces justificatives jointes. Un numéro de dossier est généré immédiatement.",
     },
     {
       t: "Instruction technique",
@@ -54,7 +54,7 @@ const FR = {
     },
     {
       t: "Suivi et renouvellement",
-      d: "L'exploitant doit respecter les prescriptions imposées, déclarer toute modification substantielle et solliciter le renouvellement avant l'échéance de l'autorisation.",
+      d: "L'exploitant doit respecter les prescriptions imposées, déclarer toute modification substantielle et solliciter le renouvellement — directement depuis son espace demandeur — avant l'échéance de l'autorisation.",
     },
   ],
   faqTitle: "Infos pratiques",
@@ -99,16 +99,16 @@ const EN: typeof FR = {
     "An 'authorisation' is a written permission granted by ARSN to an operator to carry out non-exempt activities involving ionising radiation. The authorisation is issued on the basis of a safety and security assessment and comes with specific conditions and prescriptions the operator must comply with.",
   processTitle: "Application process",
   processBody:
-    "Any natural or legal person wishing to carry out an activity involving nuclear material, sources of ionising radiation or any other facility subject to regulatory control must obtain prior authorisation from the Senegalese Authority for Radiation Protection, Nuclear Safety and Security (ARSN).",
+    "Any natural or legal person wishing to carry out an activity involving nuclear material, sources of ionising radiation or any other facility subject to regulatory control must obtain prior authorisation from the Senegalese Authority for Radiation Protection, Nuclear Safety and Security (ARSN). The entire process — filing, tracking and exchanges with the reviewer — now happens online through the applicant portal.",
   stepsTitle: "Procedure steps",
   steps: [
     {
-      t: "Prepare the file",
-      d: "The applicant downloads the form matching their activity (import, export, holding and use, transport) and gathers the required supporting documents.",
+      t: "Create an applicant account",
+      d: "The applicant creates an account on the online applicant portal and selects the authorisation type matching their activity (import, export, holding and use, transport).",
     },
     {
-      t: "Submit the application",
-      d: "The complete file is sent to ARSN. An acknowledgement of receipt is provided.",
+      t: "Submit the application online",
+      d: "The application is submitted directly from the applicant portal, with supporting documents attached. A case number is generated immediately.",
     },
     {
       t: "Technical review",
@@ -189,6 +189,14 @@ function Page() {
               </li>
             ))}
           </ol>
+          <div className="mt-8">
+            <Link
+              to="/connexion"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-arsn-green text-white text-sm font-semibold rounded-lg transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98]"
+            >
+              Démarrer une demande en ligne →
+            </Link>
+          </div>
         </section>
 
         <section>
