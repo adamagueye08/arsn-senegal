@@ -74,40 +74,33 @@ export interface DashboardStats {
   demandesApprouvees: number;
   demandesRejetees: number;
   demandesExpirees: number;
+  parType: { typeAutorisationId: string; nom: string; total: number }[];
+  parMois: { mois: string; total: number }[];
 }
 
-export interface User {
+export interface StaffUser {
   id: string;
   email: string;
   nom: string;
   prenom: string;
   role: string;
   actif: boolean;
-  telephone?: string | null;
-  typeProfil?: string | null;
-  organisation?: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
-export interface AuditLog {
+export interface HistoriqueEntry {
   id: string;
   action: string;
-  entite: string;
-  entiteId?: string | null;
-  detail?: Record<string, unknown> | null;
-  ip?: string | null;
+  commentaire: string | null;
   createdAt: string;
-  user?: { email: string; nom: string; prenom: string } | null;
+  parUser?: { nom: string; prenom: string; role: string };
 }
 
-export interface TypeAutorisationFull extends TypeAutorisation {
-  frais?: string | null;
-  actif: boolean;
-  formulaireSchema: unknown;
-  piecesRequises: unknown;
-  createdAt: string;
-  etapesWorkflow?: unknown[];
+export interface DemandeDetail extends Demande {
+  donnees: Record<string, unknown>;
+  pieces: { id: string; nomFichier: string; uploadedAt: string }[];
+  historique: HistoriqueEntry[];
+  autorisation?: { pdfCheminStockage: string; qrCodeValeur: string; dateSignature: string } | null;
 }
 
 export const api = {
@@ -129,21 +122,39 @@ export const api = {
   },
   demandes: {
     lister: () => request<Demande[]>("/demandes"),
+    detail: (id: string) => request<DemandeDetail>(`/demandes/${id}`),
     creer: (data: { typeAutorisationId: string; donnees: Record<string, unknown> }) =>
       request<Demande>("/demandes", { method: "POST", body: JSON.stringify(data) }),
+    modifier: (id: string, donnees: Record<string, unknown>) =>
+      request<Demande>(`/demandes/${id}`, { method: "PUT", body: JSON.stringify({ donnees }) }),
     soumettre: (id: string) => request<Demande>(`/demandes/${id}/submit`, { method: "POST" }),
-    completer: (id: string, commentaire?: string) =>
+    repondreComplement: (id: string, donnees: Record<string, unknown>, commentaire?: string) =>
       request<Demande>(`/demandes/${id}/complement`, {
         method: "POST",
-        body: JSON.stringify({ commentaire }),
+        body: JSON.stringify({ donnees, commentaire }),
       }),
-    renouveler: (id: string) =>
-      request<Demande>(`/demandes/${id}/renouveler`, { method: "POST", body: JSON.stringify({}) }),
+    renouveler: (id: string) => request<Demande>(`/demandes/${id}/renouveler`, { method: "POST" }),
     envoyerMessage: (id: string, commentaire: string) =>
-      request<Demande>(`/demandes/${id}/messages`, {
+      request<HistoriqueEntry>(`/demandes/${id}/messages`, {
         method: "POST",
         body: JSON.stringify({ commentaire }),
       }),
+    echeancesProches: () => request<Demande[]>("/demandes/echeances/proches"),
+    ajouterPieces: async (id: string, fichiers: File[]) => {
+      const token = getToken();
+      const formData = new FormData();
+      fichiers.forEach((f) => formData.append("fichiers", f));
+      const res = await fetch(`${API_URL}/demandes/${id}/pieces`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData,
+      });
+      if (!res.ok) {
+        const erreur = await res.json().catch(() => ({ erreur: res.statusText }));
+        throw new Error(typeof erreur.erreur === "string" ? erreur.erreur : "Erreur d'envoi");
+      }
+      return res.json();
+    },
   },
   admin: {
     dashboard: () => request<DashboardStats>("/admin/dashboard"),
@@ -154,11 +165,6 @@ export const api = {
       const qs = query.toString();
       return request<DemandeAdmin[]>(`/admin/demandes${qs ? `?${qs}` : ""}`);
     },
-    affecter: (id: string, instructeurId: string) =>
-      request<Demande>(`/admin/demandes/${id}/affecter`, {
-        method: "POST",
-        body: JSON.stringify({ instructeurId }),
-      }),
     valider: (id: string, opts?: { decisionFinale?: boolean; commentaire?: string }) =>
       request<Demande>(`/admin/demandes/${id}/valider`, { method: "POST", body: JSON.stringify(opts ?? {}) }),
     rejeter: (id: string, motif?: string) =>
@@ -168,12 +174,12 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ commentaire }),
       }),
-    utilisateurs: {
-      lister: () => request<User[]>("/admin/users"),
+    users: {
+      lister: () => request<StaffUser[]>("/admin/users"),
       creer: (data: { email: string; motDePasse: string; nom: string; prenom: string; role: string }) =>
-        request<User>("/admin/users", { method: "POST", body: JSON.stringify(data) }),
+        request<StaffUser>("/admin/users", { method: "POST", body: JSON.stringify(data) }),
       modifier: (id: string, data: { role?: string; actif?: boolean }) =>
-        request<User>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+        request<StaffUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
       reinitialiserMotDePasse: (id: string, nouveauMotDePasse: string) =>
         request<{ statut: string }>(`/admin/users/${id}/reinitialiser-mot-de-passe`, {
           method: "POST",
@@ -181,24 +187,12 @@ export const api = {
         }),
       supprimer: (id: string) => request<{ statut: string }>(`/admin/users/${id}`, { method: "DELETE" }),
     },
-    audit: {
-      lister: () => request<AuditLog[]>("/admin/audit"),
-    },
     typesAutorisation: {
-      lister: () => request<TypeAutorisationFull[]>("/admin/types-autorisation"),
-      creer: (data: {
-        nom: string;
-        description?: string;
-        dureeValiditeMois: number;
-        frais?: number;
-        actif?: boolean;
-        formulaireSchema?: unknown;
-        piecesRequises?: unknown;
-      }) =>
-        request<TypeAutorisationFull>("/admin/types-autorisation", {
-          method: "POST",
-          body: JSON.stringify(data),
-        }),
+      lister: () => request<TypeAutorisation[]>("/admin/types-autorisation"),
+      creer: (data: { nom: string; description?: string; dureeValiditeMois: number; frais?: number }) =>
+        request<TypeAutorisation>("/admin/types-autorisation", { method: "POST", body: JSON.stringify(data) }),
+      modifier: (id: string, data: Partial<{ nom: string; description: string; dureeValiditeMois: number; frais: number; actif: boolean }>) =>
+        request<TypeAutorisation>(`/admin/types-autorisation/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     },
   },
 };

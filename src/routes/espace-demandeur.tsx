@@ -10,6 +10,7 @@ import {
   clearSession,
   type TypeAutorisation,
   type Demande,
+  type DemandeDetail,
 } from "@/lib/api";
 
 export const Route = createFileRoute("/espace-demandeur")({
@@ -87,8 +88,6 @@ function Page() {
   const [user, setUser] = useState<{ nom: string; prenom: string; role: string } | null>(null);
   const [checked, setChecked] = useState(false);
 
-  // Garde d'accès : il faut être connecté ET être un DEMANDEUR.
-  // Un agent ARSN qui arrive ici est renvoyé vers /admin.
   useEffect(() => {
     const stored = getStoredUser<{ nom: string; prenom: string; role: string }>();
     if (!stored || !getToken()) {
@@ -121,18 +120,31 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
   const [types, setTypes] = useState<TypeAutorisation[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [demandes, setDemandes] = useState<Demande[]>([]);
+  const [echeances, setEcheances] = useState<Demande[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  async function loadAll() {
+    setLoadingData(true);
+    try {
+      const [t, d, e] = await Promise.all([
+        api.typesAutorisation.lister(),
+        api.demandes.lister(),
+        api.demandes.echeancesProches().catch(() => []),
+      ]);
+      setTypes(t);
+      setSelectedType((prev) => prev || t[0]?.id || "");
+      setDemandes(d);
+      setEcheances(e);
+    } catch (e: any) {
+      toast.error(c.errorGeneric, { description: String(e.message || e) });
+    } finally {
+      setLoadingData(false);
+    }
+  }
 
   useEffect(() => {
-    setLoadingData(true);
-    Promise.all([api.typesAutorisation.lister(), api.demandes.lister()])
-      .then(([t, d]) => {
-        setTypes(t);
-        setSelectedType((prev) => prev || t[0]?.id || "");
-        setDemandes(d);
-      })
-      .catch((e: any) => toast.error(c.errorGeneric, { description: String(e.message || e) }))
-      .finally(() => setLoadingData(false));
+    loadAll();
   }, []);
 
   async function handleNewRequest(e: React.FormEvent) {
@@ -157,7 +169,7 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
   }
 
   return (
-    <div className="p-8 bg-white ring-1 ring-black/5 shadow-sm hover:shadow-md transition-shadow duration-300 space-y-8">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <p className="text-sm">
           {c.welcome} <strong>{user.prenom} {user.nom}</strong>
@@ -167,15 +179,27 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
         </button>
       </div>
 
-      <div>
-        <h2 className="text-xl font-serif font-bold mb-4">{c.newRequestTitle}</h2>
+      {echeances.length > 0 && (
+        <div className="p-4 bg-arsn-yellow/10 ring-1 ring-arsn-yellow/30 rounded-lg text-sm animate-reveal">
+          <strong className="block mb-1">⏳ Échéances à venir</strong>
+          {echeances.map((d) => (
+            <div key={d.id} className="text-muted-foreground">
+              {d.numero} — {d.typeAutorisation?.nom} : expire le{" "}
+              {d.dateExpiration ? new Date(d.dateExpiration).toLocaleDateString("fr-FR") : "—"}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="p-8 bg-white ring-1 ring-black/5 shadow-sm rounded-lg">
+        <h2 className="text-xl font-serif mb-4">{c.newRequestTitle}</h2>
         <form onSubmit={handleNewRequest} className="grid sm:grid-cols-[1fr_auto] gap-4 items-end max-w-2xl">
           <div>
             <label className="block text-xs font-mono uppercase tracking-[0.2em] mb-2">{c.chooseType}</label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
+              className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
             >
               {types.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -201,22 +225,221 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
         ) : demandes.length === 0 ? (
           <p className="text-sm text-muted-foreground">{c.noRequests}</p>
         ) : (
-          <ul className="space-y-2">
+          <div className="space-y-2">
             {demandes.map((d, i) => (
-              <li
+              <DemandeRow
                 key={d.id}
-                style={{ animationDelay: `${i * 60}ms` }}
-                className="flex items-center justify-between p-4 ring-1 ring-black/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-sm rounded-lg animate-reveal"
-              >
-                <span className="font-mono">{d.numero}</span>
-                <span className="text-muted-foreground">{d.typeAutorisation?.nom}</span>
-                <span className="font-semibold">
-                  {c.statusLabels[d.statut as keyof typeof c.statusLabels] ?? d.statut}
-                </span>
-              </li>
+                demande={d}
+                c={c}
+                expanded={expandedId === d.id}
+                delay={i * 60}
+                onToggle={() => setExpandedId(expandedId === d.id ? null : d.id)}
+                onChanged={loadAll}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DemandeRow({
+  demande,
+  c,
+  expanded,
+  delay,
+  onToggle,
+  onChanged,
+}: {
+  demande: Demande;
+  c: Dict;
+  expanded: boolean;
+  delay: number;
+  onToggle: () => void;
+  onChanged: () => void;
+}) {
+  return (
+    <div
+      style={{ animationDelay: `${delay}ms` }}
+      className="ring-1 ring-black/5 shadow-sm rounded-lg overflow-hidden animate-reveal"
+    >
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between p-4 text-sm hover:bg-secondary/40 transition-colors duration-200 text-left"
+      >
+        <span className="font-mono">{demande.numero}</span>
+        <span className="text-muted-foreground">{demande.typeAutorisation?.nom}</span>
+        <span className="font-semibold">
+          {c.statusLabels[demande.statut as keyof typeof c.statusLabels] ?? demande.statut}
+        </span>
+        <span className="text-xs">{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && <DemandeDetailPanel demandeId={demande.id} statut={demande.statut} onChanged={onChanged} />}
+    </div>
+  );
+}
+
+function DemandeDetailPanel({
+  demandeId,
+  statut,
+  onChanged,
+}: {
+  demandeId: string;
+  statut: string;
+  onChanged: () => void;
+}) {
+  const [detail, setDetail] = useState<DemandeDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function load() {
+    setLoading(true);
+    try {
+      const d = await api.demandes.detail(demandeId);
+      setDetail(d);
+    } catch (err: any) {
+      toast.error("Erreur", { description: String(err.message || err) });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, [demandeId]);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    try {
+      await api.demandes.ajouterPieces(demandeId, Array.from(files));
+      toast.success("Pièce(s) jointe(s) ajoutée(s)");
+      await load();
+    } catch (err: any) {
+      toast.error("Envoi impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleSendMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!message.trim()) return;
+    setBusy(true);
+    try {
+      await api.demandes.envoyerMessage(demandeId, message.trim());
+      setMessage("");
+      await load();
+    } catch (err: any) {
+      toast.error("Envoi impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRepondreComplement() {
+    setBusy(true);
+    try {
+      await api.demandes.repondreComplement(demandeId, {}, "Complément fourni par le demandeur.");
+      toast.success("Complément envoyé, votre dossier repart en instruction.");
+      await load();
+      onChanged();
+    } catch (err: any) {
+      toast.error("Action impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRenouveler() {
+    setBusy(true);
+    try {
+      const nouvelle = await api.demandes.renouveler(demandeId);
+      toast.success("Demande de renouvellement créée", { description: nouvelle.numero });
+      onChanged();
+    } catch (err: any) {
+      toast.error("Action impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (loading || !detail) {
+    return <div className="p-4 border-t border-border text-sm text-muted-foreground">Chargement…</div>;
+  }
+
+  return (
+    <div className="p-4 border-t border-border bg-secondary/20 space-y-6 text-sm">
+      {statut === "COMPLEMENT_REQUIS" && (
+        <div className="p-3 bg-arsn-yellow/10 ring-1 ring-arsn-yellow/30 rounded-lg flex items-center justify-between gap-3">
+          <span>L'ARSN a demandé un complément d'information sur ce dossier.</span>
+          <button
+            disabled={busy}
+            onClick={handleRepondreComplement}
+            className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 active:scale-[0.97] whitespace-nowrap"
+          >
+            J'ai complété mon dossier
+          </button>
+        </div>
+      )}
+
+      {statut === "APPROUVEE" && (
+        <div className="p-3 bg-arsn-green/10 ring-1 ring-arsn-green/30 rounded-lg flex items-center justify-between gap-3">
+          <span>Autorisation approuvée.</span>
+          <button
+            disabled={busy}
+            onClick={handleRenouveler}
+            className="px-4 py-2 bg-foreground text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-sm active:scale-[0.97] whitespace-nowrap"
+          >
+            Demander un renouvellement
+          </button>
+        </div>
+      )}
+
+      <div>
+        <h4 className="font-mono uppercase tracking-[0.15em] text-xs mb-2">Pièces justificatives</h4>
+        {detail.pieces.length === 0 ? (
+          <p className="text-muted-foreground text-xs mb-2">Aucune pièce jointe pour l'instant.</p>
+        ) : (
+          <ul className="mb-2 space-y-1">
+            {detail.pieces.map((p) => (
+              <li key={p.id} className="text-xs text-muted-foreground">📎 {p.nomFichier}</li>
             ))}
           </ul>
         )}
+        <input type="file" multiple disabled={busy} onChange={handleUpload} className="text-xs" />
+      </div>
+
+      <div>
+        <h4 className="font-mono uppercase tracking-[0.15em] text-xs mb-2">Échanger avec l'instructeur</h4>
+        <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
+          {detail.historique.filter((h) => h.action === "MESSAGE" || h.commentaire).map((h) => (
+            <div key={h.id} className="p-2 bg-white rounded-lg ring-1 ring-black/5 text-xs">
+              <div className="font-semibold">{h.parUser ? `${h.parUser.prenom} ${h.parUser.nom}` : "—"}</div>
+              <div className="text-muted-foreground">{h.commentaire}</div>
+            </div>
+          ))}
+        </div>
+        <form onSubmit={handleSendMessage} className="flex gap-2">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Écrire un message…"
+            className="flex-1 border border-border bg-white px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="px-4 py-2 bg-foreground text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-sm active:scale-[0.97]"
+          >
+            Envoyer
+          </button>
+        </form>
       </div>
     </div>
   );
