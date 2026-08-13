@@ -35,9 +35,16 @@ const FR = {
   newRequestTitle: "Déposer une nouvelle demande",
   chooseType: "Type d'autorisation",
   submitBtn: "Soumettre la demande",
+  saveDraftBtn: "Enregistrer comme brouillon",
   myRequestsTitle: "Mes demandes",
   noRequests: "Vous n'avez pas encore déposé de demande.",
   loading: "Chargement…",
+  draftNotesLabel: "Informations du dossier (modifiable tant que la demande n'est pas soumise)",
+  draftNotesPlaceholder: "Renseignez ici les informations de votre dossier…",
+  saveNotesBtn: "Enregistrer",
+  submitFromDraftBtn: "Soumettre la demande",
+  successDraft: "Brouillon enregistré",
+  successDraftDesc: "Vous pourrez le compléter et le soumettre plus tard. Numéro",
   statusLabels: {
     BROUILLON: "Brouillon",
     SOUMISE: "Soumise",
@@ -61,9 +68,16 @@ const EN: typeof FR = {
   newRequestTitle: "Submit a new request",
   chooseType: "Authorisation type",
   submitBtn: "Submit request",
+  saveDraftBtn: "Save as draft",
   myRequestsTitle: "My requests",
   noRequests: "You haven't submitted any request yet.",
   loading: "Loading…",
+  draftNotesLabel: "Request details (editable until the request is submitted)",
+  draftNotesPlaceholder: "Enter your request details here…",
+  saveNotesBtn: "Save",
+  submitFromDraftBtn: "Submit request",
+  successDraft: "Draft saved",
+  successDraftDesc: "You can complete and submit it later. Number",
   statusLabels: {
     BROUILLON: "Draft",
     SOUMISE: "Submitted",
@@ -147,15 +161,19 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
     loadAll();
   }, []);
 
-  async function handleNewRequest(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleNewRequest(soumettreDirectement: boolean) {
     if (!selectedType) return;
     setBusy(true);
     try {
       const demande = await api.demandes.creer({ typeAutorisationId: selectedType, donnees: {} });
-      const soumise = await api.demandes.soumettre(demande.id);
-      setDemandes((prev) => [soumise, ...prev]);
-      toast.success(c.successRequest, { description: `${c.successRequestDesc} ${soumise.numero}` });
+      if (soumettreDirectement) {
+        const soumise = await api.demandes.soumettre(demande.id);
+        setDemandes((prev) => [soumise, ...prev]);
+        toast.success(c.successRequest, { description: `${c.successRequestDesc} ${soumise.numero}` });
+      } else {
+        setDemandes((prev) => [demande, ...prev]);
+        toast.success(c.successDraft, { description: `${c.successDraftDesc} ${demande.numero}` });
+      }
     } catch (err: any) {
       toast.error(c.errorGeneric, { description: String(err.message || err) });
     } finally {
@@ -193,7 +211,7 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
 
       <div className="p-8 bg-white ring-1 ring-black/5 shadow-sm rounded-lg">
         <h2 className="text-xl font-serif mb-4">{c.newRequestTitle}</h2>
-        <form onSubmit={handleNewRequest} className="grid sm:grid-cols-[1fr_auto] gap-4 items-end max-w-2xl">
+        <div className="grid sm:grid-cols-[1fr_auto_auto] gap-4 items-end max-w-3xl">
           <div>
             <label className="block text-xs font-mono uppercase tracking-[0.2em] mb-2">{c.chooseType}</label>
             <select
@@ -209,13 +227,22 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
             </select>
           </div>
           <button
-            type="submit"
+            type="button"
+            onClick={() => handleNewRequest(false)}
+            disabled={busy || !selectedType}
+            className="px-6 py-3 bg-white text-foreground ring-1 ring-border text-sm font-semibold hover:bg-secondary/40 rounded-lg disabled:opacity-50 h-fit transition-all duration-200 active:scale-[0.98]"
+          >
+            {c.saveDraftBtn}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleNewRequest(true)}
             disabled={busy || !selectedType}
             className="px-6 py-3 bg-arsn-green text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 h-fit transition-all duration-200 hover:shadow-md active:scale-[0.98]"
           >
             {c.submitBtn}
           </button>
-        </form>
+        </div>
       </div>
 
       <div>
@@ -293,12 +320,14 @@ function DemandeDetailPanel({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [draftNotes, setDraftNotes] = useState("");
 
   async function load() {
     setLoading(true);
     try {
       const d = await api.demandes.detail(demandeId);
       setDetail(d);
+      setDraftNotes(typeof d.donnees?.notes === "string" ? d.donnees.notes : "");
     } catch (err: any) {
       toast.error("Erreur", { description: String(err.message || err) });
     } finally {
@@ -309,6 +338,34 @@ function DemandeDetailPanel({
   useEffect(() => {
     load();
   }, [demandeId]);
+
+  async function handleSaveDraft() {
+    setBusy(true);
+    try {
+      await api.demandes.modifier(demandeId, { ...(detail?.donnees ?? {}), notes: draftNotes });
+      toast.success("Brouillon enregistré");
+      await load();
+    } catch (err: any) {
+      toast.error("Enregistrement impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSubmitDraft() {
+    setBusy(true);
+    try {
+      await api.demandes.modifier(demandeId, { ...(detail?.donnees ?? {}), notes: draftNotes });
+      await api.demandes.soumettre(demandeId);
+      toast.success("Demande soumise");
+      await load();
+      onChanged();
+    } catch (err: any) {
+      toast.error("Soumission impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
@@ -344,7 +401,11 @@ function DemandeDetailPanel({
   async function handleRepondreComplement() {
     setBusy(true);
     try {
-      await api.demandes.repondreComplement(demandeId, {}, "Complément fourni par le demandeur.");
+      await api.demandes.repondreComplement(
+        demandeId,
+        { ...(detail?.donnees ?? {}), notes: draftNotes },
+        "Complément fourni par le demandeur."
+      );
       toast.success("Complément envoyé, votre dossier repart en instruction.");
       await load();
       onChanged();
@@ -375,15 +436,41 @@ function DemandeDetailPanel({
   return (
     <div className="p-4 border-t border-border bg-secondary/20 space-y-6 text-sm">
       {statut === "COMPLEMENT_REQUIS" && (
-        <div className="p-3 bg-arsn-yellow/10 ring-1 ring-arsn-yellow/30 rounded-lg flex items-center justify-between gap-3">
-          <span>L'ARSN a demandé un complément d'information sur ce dossier.</span>
-          <button
-            disabled={busy}
-            onClick={handleRepondreComplement}
-            className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 active:scale-[0.97] whitespace-nowrap"
-          >
-            J'ai complété mon dossier
-          </button>
+        <div className="p-3 bg-arsn-yellow/10 ring-1 ring-arsn-yellow/30 rounded-lg text-sm">
+          L'ARSN a demandé un complément d'information sur ce dossier. Complétez les informations ci-dessous et vos
+          pièces justificatives, puis envoyez votre complément.
+        </div>
+      )}
+
+      {(statut === "BROUILLON" || statut === "COMPLEMENT_REQUIS") && (
+        <div className="p-4 bg-white ring-1 ring-black/5 rounded-lg space-y-3">
+          <h4 className="font-mono uppercase tracking-[0.15em] text-xs">Informations du dossier</h4>
+          <label className="block text-xs text-muted-foreground">{
+            "Renseignez les informations de votre dossier, enregistrez pour continuer plus tard, ou soumettez quand il est complet."
+          }</label>
+          <textarea
+            value={draftNotes}
+            onChange={(e) => setDraftNotes(e.target.value)}
+            rows={4}
+            placeholder="Renseignez ici les informations de votre dossier…"
+            className="w-full border border-border bg-white px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
+          />
+          <div className="flex gap-2">
+            <button
+              disabled={busy}
+              onClick={handleSaveDraft}
+              className="px-4 py-2 bg-white ring-1 ring-border text-foreground text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:bg-secondary/40 active:scale-[0.97]"
+            >
+              Enregistrer
+            </button>
+            <button
+              disabled={busy}
+              onClick={statut === "COMPLEMENT_REQUIS" ? handleRepondreComplement : handleSubmitDraft}
+              className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
+            >
+              {statut === "COMPLEMENT_REQUIS" ? "Envoyer le complément" : "Soumettre la demande"}
+            </button>
+          </div>
         </div>
       )}
 

@@ -60,6 +60,7 @@ export interface Demande {
   numero: string;
   statut: string;
   createdAt: string;
+  dateExpiration?: string | null;
   typeAutorisation?: TypeAutorisation;
 }
 
