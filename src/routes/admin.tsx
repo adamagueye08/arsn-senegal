@@ -100,7 +100,7 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
   async function handleAction(id: string, action: "valider" | "rejeter" | "retourner") {
     setBusyId(id);
     try {
-      if (action === "valider") await api.admin.valider(id, { decisionFinale: true });
+      if (action === "valider") await api.admin.valider(id);
       if (action === "rejeter") await api.admin.rejeter(id);
       if (action === "retourner") await api.admin.retourner(id);
       toast.success("Dossier mis à jour");
@@ -227,27 +227,33 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
                 </div>
                 <div className="font-semibold min-w-[140px]">{STATUT_LABELS[d.statut] ?? d.statut}</div>
                 <div className="flex gap-2">
-                  <button
-                    disabled={busyId === d.id}
-                    onClick={() => handleAction(d.id, "valider")}
-                    className="px-3 py-1.5 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
-                  >
-                    Valider
-                  </button>
-                  <button
-                    disabled={busyId === d.id}
-                    onClick={() => handleAction(d.id, "retourner")}
-                    className="px-3 py-1.5 bg-arsn-yellow text-foreground text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
-                  >
-                    Complément
-                  </button>
-                  <button
-                    disabled={busyId === d.id}
-                    onClick={() => handleAction(d.id, "rejeter")}
-                    className="px-3 py-1.5 bg-arsn-red text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
-                  >
-                    Rejeter
-                  </button>
+                  {["APPROUVEE", "REJETEE"].includes(d.statut) ? (
+                    <span className="text-xs text-muted-foreground italic">Dossier clôturé</span>
+                  ) : (
+                    <>
+                      <button
+                        disabled={busyId === d.id}
+                        onClick={() => handleAction(d.id, "valider")}
+                        className="px-3 py-1.5 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
+                      >
+                        Valider
+                      </button>
+                      <button
+                        disabled={busyId === d.id}
+                        onClick={() => handleAction(d.id, "retourner")}
+                        className="px-3 py-1.5 bg-arsn-yellow text-foreground text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
+                      >
+                        Complément
+                      </button>
+                      <button
+                        disabled={busyId === d.id}
+                        onClick={() => handleAction(d.id, "rejeter")}
+                        className="px-3 py-1.5 bg-arsn-red text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
+                      >
+                        Rejeter
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

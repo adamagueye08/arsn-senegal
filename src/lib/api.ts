@@ -165,7 +165,7 @@ export const api = {
       const qs = query.toString();
       return request<DemandeAdmin[]>(`/admin/demandes${qs ? `?${qs}` : ""}`);
     },
-    valider: (id: string, opts?: { decisionFinale?: boolean; commentaire?: string }) =>
+    valider: (id: string, opts?: { commentaire?: string }) =>
       request<Demande>(`/admin/demandes/${id}/valider`, { method: "POST", body: JSON.stringify(opts ?? {}) }),
     rejeter: (id: string, motif?: string) =>
       request<Demande>(`/admin/demandes/${id}/rejeter`, { method: "POST", body: JSON.stringify({ motif }) }),
