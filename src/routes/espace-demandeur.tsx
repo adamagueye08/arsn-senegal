@@ -12,6 +12,7 @@ import {
   type Demande,
   type DemandeDetail,
 } from "@/lib/api";
+import { DynamicRequestForm } from "@/components/forms/DynamicRequestForm";
 
 export const Route = createFileRoute("/espace-demandeur")({
   head: () => ({
@@ -339,6 +340,38 @@ function DemandeDetailPanel({
     load();
   }, [demandeId]);
 
+  async function handleSaveStep(donneesCompletes: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      await api.demandes.modifier(demandeId, donneesCompletes);
+      await load();
+    } catch (err: any) {
+      toast.error("Enregistrement impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSubmitDynamicForm(donneesCompletes: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      if (statut === "COMPLEMENT_REQUIS") {
+        await api.demandes.repondreComplement(demandeId, donneesCompletes, "Complément fourni par le demandeur.");
+        toast.success("Complément envoyé, votre dossier repart en instruction.");
+      } else {
+        await api.demandes.modifier(demandeId, donneesCompletes);
+        await api.demandes.soumettre(demandeId);
+        toast.success("Demande soumise");
+      }
+      await load();
+      onChanged();
+    } catch (err: any) {
+      toast.error("Soumission impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleSaveDraft() {
     setBusy(true);
     try {
@@ -443,6 +476,19 @@ function DemandeDetailPanel({
       )}
 
       {(statut === "BROUILLON" || statut === "COMPLEMENT_REQUIS") && (
+        detail.typeAutorisation?.formulaireSchema?.sections?.length ? (
+          <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg">
+            <DynamicRequestForm
+              schema={detail.typeAutorisation.formulaireSchema}
+              initialValue={detail.donnees ?? {}}
+              piecesRequises={detail.typeAutorisation.piecesRequises}
+              pieces={detail.pieces}
+              busy={busy}
+              onSaveStep={handleSaveStep}
+              onSubmitFinal={handleSubmitDynamicForm}
+            />
+          </div>
+        ) : (
         <div className="p-4 bg-white ring-1 ring-black/5 rounded-lg space-y-3">
           <h4 className="font-mono uppercase tracking-[0.15em] text-xs">Informations du dossier</h4>
           <label className="block text-xs text-muted-foreground">{
@@ -472,6 +518,7 @@ function DemandeDetailPanel({
             </button>
           </div>
         </div>
+        )
       )}
 
       {statut === "APPROUVEE" && (

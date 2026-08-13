@@ -48,11 +48,33 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+export interface FormFieldDef {
+  cle: string;
+  label: string;
+  type: "texte" | "email" | "nombre" | "zone" | "choix" | "cases" | "tableau" | "confirmation" | "date";
+  requis?: boolean;
+  options?: string[];
+  valeurParDefaut?: unknown;
+  colonnes?: { cle: string; label: string }[];
+}
+
+export interface FormSectionDef {
+  titre: string;
+  champs: FormFieldDef[];
+}
+
+export interface FormSchema {
+  reference?: string;
+  sections: FormSectionDef[];
+}
+
 export interface TypeAutorisation {
   id: string;
   nom: string;
   description: string | null;
   dureeValiditeMois: number;
+  formulaireSchema?: FormSchema;
+  piecesRequises?: string[];
 }
 
 export interface Demande {
