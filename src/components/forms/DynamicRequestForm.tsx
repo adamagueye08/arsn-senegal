@@ -50,9 +50,51 @@ export function DynamicRequestForm({
     setData((prev) => ({ ...prev, [cle]: valeur }));
   }
 
+  const [error, setError] = useState<string | null>(null);
+
+  function champEstRempli(champ: FormFieldDef, valeur: unknown) {
+    if (champ.type === "cases") return Array.isArray(valeur) && valeur.length > 0;
+    if (champ.type === "confirmation") return valeur === true;
+    if (champ.type === "tableau") return Array.isArray(valeur) && valeur.length > 0;
+    return valeur !== undefined && valeur !== null && String(valeur).trim() !== "";
+  }
+
+  function champsManquants(sectionIndex: number): string[] {
+    const s = sections[sectionIndex];
+    if (!s) return [];
+    return s.champs.filter((champ) => champ.requis && !champEstRempli(champ, data[champ.cle])).map((c) => c.label);
+  }
+
+  function premiereSectionIncomplete(): number | null {
+    for (let i = 0; i < sections.length; i++) {
+      if (champsManquants(i).length > 0) return i;
+    }
+    return null;
+  }
+
   async function goTo(next: number) {
+    // On ne bloque la navigation qu'en avançant, jamais en reculant.
+    if (next > step) {
+      const manquants = champsManquants(step);
+      if (manquants.length > 0) {
+        setError(`Champs obligatoires manquants : ${manquants.join(", ")}`);
+        return;
+      }
+    }
+    setError(null);
     await onSaveStep(data);
     setStep(Math.max(0, Math.min(totalSteps - 1, next)));
+  }
+
+  async function handleSubmit() {
+    const sectionIncomplete = premiereSectionIncomplete();
+    if (sectionIncomplete !== null) {
+      setError(`Le formulaire n'est pas complet : ${champsManquants(sectionIncomplete).join(", ")}`);
+      setStep(sectionIncomplete);
+      return;
+    }
+    setError(null);
+    await onSubmitFinal(data);
   }
 
   const isFinalStep = step === totalSteps - 1;
@@ -209,34 +251,39 @@ export function DynamicRequestForm({
             ← Précédent
           </button>
 
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => onSaveStep(data)}
-              className="px-4 py-2 text-xs font-semibold rounded-lg ring-1 ring-border disabled:opacity-50 hover:bg-secondary/40 transition-all duration-200"
-            >
-              Enregistrer le brouillon
-            </button>
-            {!isFinalStep ? (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => goTo(step + 1)}
-                className="px-5 py-2 text-xs font-semibold rounded-lg bg-arsn-blue text-white disabled:opacity-50 hover:opacity-90 transition-all duration-200 active:scale-[0.97]"
-              >
-                Suivant →
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => onSubmitFinal(data)}
-                className="px-5 py-2 text-xs font-semibold rounded-lg bg-arsn-green text-white disabled:opacity-50 hover:opacity-90 transition-all duration-200 active:scale-[0.97]"
-              >
-                Soumettre la demande
-              </button>
+          <div className="flex flex-col items-end gap-2">
+            {error && (
+              <p className="text-xs text-arsn-red font-medium max-w-sm text-right animate-reveal">{error}</p>
             )}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onSaveStep(data)}
+                className="px-4 py-2 text-xs font-semibold rounded-lg ring-1 ring-border disabled:opacity-50 hover:bg-secondary/40 transition-all duration-200"
+              >
+                Enregistrer le brouillon
+              </button>
+              {!isFinalStep ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => goTo(step + 1)}
+                  className="px-5 py-2 text-xs font-semibold rounded-lg bg-arsn-blue text-white disabled:opacity-50 hover:opacity-90 transition-all duration-200 active:scale-[0.97]"
+                >
+                  Suivant →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={handleSubmit}
+                  className="px-5 py-2 text-xs font-semibold rounded-lg bg-arsn-green text-white disabled:opacity-50 hover:opacity-90 transition-all duration-200 active:scale-[0.97]"
+                >
+                  Soumettre la demande
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -36,7 +36,8 @@ const FR = {
   newRequestTitle: "Déposer une nouvelle demande",
   chooseType: "Type d'autorisation",
   submitBtn: "Soumettre la demande",
-  saveDraftBtn: "Enregistrer comme brouillon",
+  saveDraftBtn: "Créer et continuer →",
+  newRequestHint: "Vous choisirez le type, puis renseignerez le formulaire officiel correspondant étape par étape.",
   myRequestsTitle: "Mes demandes",
   noRequests: "Vous n'avez pas encore déposé de demande.",
   loading: "Chargement…",
@@ -69,7 +70,8 @@ const EN: typeof FR = {
   newRequestTitle: "Submit a new request",
   chooseType: "Authorisation type",
   submitBtn: "Submit request",
-  saveDraftBtn: "Save as draft",
+  saveDraftBtn: "Create and continue →",
+  newRequestHint: "Choose the type, then fill in the corresponding official form step by step.",
   myRequestsTitle: "My requests",
   noRequests: "You haven't submitted any request yet.",
   loading: "Loading…",
@@ -162,19 +164,14 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
     loadAll();
   }, []);
 
-  async function handleNewRequest(soumettreDirectement: boolean) {
+  async function handleNewRequest() {
     if (!selectedType) return;
     setBusy(true);
     try {
       const demande = await api.demandes.creer({ typeAutorisationId: selectedType, donnees: {} });
-      if (soumettreDirectement) {
-        const soumise = await api.demandes.soumettre(demande.id);
-        setDemandes((prev) => [soumise, ...prev]);
-        toast.success(c.successRequest, { description: `${c.successRequestDesc} ${soumise.numero}` });
-      } else {
-        setDemandes((prev) => [demande, ...prev]);
-        toast.success(c.successDraft, { description: `${c.successDraftDesc} ${demande.numero}` });
-      }
+      setDemandes((prev) => [demande, ...prev]);
+      setExpandedId(demande.id);
+      toast.success(c.successDraft, { description: `${c.successDraftDesc} ${demande.numero}` });
     } catch (err: any) {
       toast.error(c.errorGeneric, { description: String(err.message || err) });
     } finally {
@@ -211,8 +208,9 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
       )}
 
       <div className="p-8 bg-white ring-1 ring-black/5 shadow-sm rounded-lg">
-        <h2 className="text-xl font-serif mb-4">{c.newRequestTitle}</h2>
-        <div className="grid sm:grid-cols-[1fr_auto_auto] gap-4 items-end max-w-3xl">
+        <h2 className="text-xl font-serif mb-1">{c.newRequestTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-4">{c.newRequestHint}</p>
+        <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-end max-w-xl">
           <div>
             <label className="block text-xs font-mono uppercase tracking-[0.2em] mb-2">{c.chooseType}</label>
             <select
@@ -229,19 +227,11 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
           </div>
           <button
             type="button"
-            onClick={() => handleNewRequest(false)}
+            onClick={handleNewRequest}
             disabled={busy || !selectedType}
-            className="px-6 py-3 bg-white text-foreground ring-1 ring-border text-sm font-semibold hover:bg-secondary/40 rounded-lg disabled:opacity-50 h-fit transition-all duration-200 active:scale-[0.98]"
+            className="px-6 py-3 bg-arsn-blue text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 h-fit transition-all duration-200 hover:shadow-md active:scale-[0.98]"
           >
             {c.saveDraftBtn}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleNewRequest(true)}
-            disabled={busy || !selectedType}
-            className="px-6 py-3 bg-arsn-green text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 h-fit transition-all duration-200 hover:shadow-md active:scale-[0.98]"
-          >
-            {c.submitBtn}
           </button>
         </div>
       </div>
@@ -323,8 +313,8 @@ function DemandeDetailPanel({
   const [message, setMessage] = useState("");
   const [draftNotes, setDraftNotes] = useState("");
 
-  async function load() {
-    setLoading(true);
+  async function load(silent = false) {
+    if (!silent) setLoading(true);
     try {
       const d = await api.demandes.detail(demandeId);
       setDetail(d);
@@ -332,7 +322,7 @@ function DemandeDetailPanel({
     } catch (err: any) {
       toast.error("Erreur", { description: String(err.message || err) });
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
@@ -344,7 +334,7 @@ function DemandeDetailPanel({
     setBusy(true);
     try {
       await api.demandes.modifier(demandeId, donneesCompletes);
-      await load();
+      await load(true);
     } catch (err: any) {
       toast.error("Enregistrement impossible", { description: String(err.message || err) });
     } finally {
@@ -363,7 +353,7 @@ function DemandeDetailPanel({
         await api.demandes.soumettre(demandeId);
         toast.success("Demande soumise");
       }
-      await load();
+      await load(true);
       onChanged();
     } catch (err: any) {
       toast.error("Soumission impossible", { description: String(err.message || err) });
@@ -377,7 +367,7 @@ function DemandeDetailPanel({
     try {
       await api.demandes.modifier(demandeId, { ...(detail?.donnees ?? {}), notes: draftNotes });
       toast.success("Brouillon enregistré");
-      await load();
+      await load(true);
     } catch (err: any) {
       toast.error("Enregistrement impossible", { description: String(err.message || err) });
     } finally {
@@ -391,7 +381,7 @@ function DemandeDetailPanel({
       await api.demandes.modifier(demandeId, { ...(detail?.donnees ?? {}), notes: draftNotes });
       await api.demandes.soumettre(demandeId);
       toast.success("Demande soumise");
-      await load();
+      await load(true);
       onChanged();
     } catch (err: any) {
       toast.error("Soumission impossible", { description: String(err.message || err) });
@@ -407,7 +397,7 @@ function DemandeDetailPanel({
     try {
       await api.demandes.ajouterPieces(demandeId, Array.from(files));
       toast.success("Pièce(s) jointe(s) ajoutée(s)");
-      await load();
+      await load(true);
     } catch (err: any) {
       toast.error("Envoi impossible", { description: String(err.message || err) });
     } finally {
@@ -423,7 +413,7 @@ function DemandeDetailPanel({
     try {
       await api.demandes.envoyerMessage(demandeId, message.trim());
       setMessage("");
-      await load();
+      await load(true);
     } catch (err: any) {
       toast.error("Envoi impossible", { description: String(err.message || err) });
     } finally {
@@ -440,7 +430,7 @@ function DemandeDetailPanel({
         "Complément fourni par le demandeur."
       );
       toast.success("Complément envoyé, votre dossier repart en instruction.");
-      await load();
+      await load(true);
       onChanged();
     } catch (err: any) {
       toast.error("Action impossible", { description: String(err.message || err) });
