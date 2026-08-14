@@ -466,17 +466,20 @@ function DemandeAdminPanel({
               déposée ici.
             </p>
           )}
-          <div className="flex items-center gap-3 mt-3">
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => setAttestationFile(e.target.files?.[0] ?? null)}
-              className="text-xs"
-            />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3">
+            <label className="inline-flex items-center gap-2 px-4 py-2 ring-1 ring-arsn-blue text-arsn-blue text-xs font-semibold rounded-lg cursor-pointer hover:bg-arsn-blue/5 transition-all duration-200 w-fit max-w-full truncate">
+              📎 {attestationFile ? attestationFile.name : "Choisir le fichier PDF"}
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setAttestationFile(e.target.files?.[0] ?? null)}
+                className="hidden"
+              />
+            </label>
             <button
               disabled={!attestationFile || busy}
               onClick={handleUploadAttestation}
-              className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200"
+              className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200 w-fit shrink-0"
             >
               {detail.autorisation ? "Remplacer" : "Envoyer au demandeur"}
             </button>

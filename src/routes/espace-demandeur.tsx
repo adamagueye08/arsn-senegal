@@ -547,15 +547,34 @@ function DemandeDetailPanel({
       )}
 
       {statut === "APPROUVEE" && (
-        <div className="p-3 bg-arsn-green/10 ring-1 ring-arsn-green/30 rounded-lg flex items-center justify-between gap-3">
-          <span>Autorisation approuvée.</span>
-          <button
-            disabled={busy}
-            onClick={handleRenouveler}
-            className="px-4 py-2 bg-foreground text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-sm active:scale-[0.97] whitespace-nowrap"
-          >
-            Demander un renouvellement
-          </button>
+        <div className="p-3 bg-arsn-green/10 ring-1 ring-arsn-green/30 rounded-lg space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <span>Autorisation approuvée.</span>
+            <button
+              disabled={busy}
+              onClick={handleRenouveler}
+              className="px-4 py-2 bg-foreground text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-sm active:scale-[0.97] whitespace-nowrap"
+            >
+              Demander un renouvellement
+            </button>
+          </div>
+          {detail.autorisation ? (
+            <div className="flex items-center justify-between gap-3 p-3 bg-white rounded-lg ring-1 ring-black/5">
+              <span className="text-sm">📄 {detail.autorisation.pdfNomFichier || "Attestation d'autorisation"}</span>
+              <button
+                onClick={() =>
+                  api.demandes.telechargerAttestation(demandeId, detail.autorisation?.pdfNomFichier || undefined)
+                }
+                className="shrink-0 px-3 py-1.5 bg-arsn-green text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all duration-200"
+              >
+                Télécharger l'attestation
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Votre attestation sera disponible ici dès que l'ARSN l'aura déposée.
+            </p>
+          )}
         </div>
       )}
 
@@ -564,13 +583,24 @@ function DemandeDetailPanel({
         {detail.pieces.length === 0 ? (
           <p className="text-muted-foreground text-xs mb-2">Aucune pièce jointe pour l'instant.</p>
         ) : (
-          <ul className="mb-2 space-y-1">
+          <ul className="mb-3 space-y-1">
             {detail.pieces.map((p) => (
-              <li key={p.id} className="text-xs text-muted-foreground">📎 {p.nomFichier}</li>
+              <li key={p.id} className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-muted-foreground truncate min-w-0">📎 {p.nomFichier}</span>
+                <button
+                  onClick={() => api.demandes.telechargerPiece(demandeId, p.id, p.nomFichier)}
+                  className="shrink-0 text-arsn-blue font-semibold hover:underline"
+                >
+                  Télécharger
+                </button>
+              </li>
             ))}
           </ul>
         )}
-        <input type="file" multiple disabled={busy} onChange={handleUpload} className="text-xs" />
+        <label className="inline-flex items-center gap-2 px-4 py-2 bg-arsn-blue text-white text-xs font-semibold rounded-lg cursor-pointer hover:opacity-90 transition-all duration-200">
+          📎 Choisir des fichiers à joindre
+          <input type="file" multiple disabled={busy} onChange={handleUpload} className="hidden" />
+        </label>
       </div>
 
       <div>
