@@ -49,6 +49,31 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+async function downloadFile(path: string, filenameFallback: string) {
+  const token = getToken();
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const erreur = await res.json().catch(() => ({ erreur: res.statusText }));
+    throw new Error(
+      typeof erreur.erreur === "string" ? erreur.erreur : JSON.stringify(erreur.erreur ?? "Téléchargement impossible")
+    );
+  }
+  const blob = await res.blob();
+  const cd = res.headers.get("Content-Disposition");
+  const match = cd?.match(/filename="?([^"]+)"?/);
+  const filename = match ? match[1] : filenameFallback;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export interface FormFieldDef {
   cle: string;
   label: string;
@@ -124,7 +149,7 @@ export interface DemandeDetail extends Demande {
   donnees: Record<string, unknown>;
   pieces: { id: string; nomFichier: string; uploadedAt: string }[];
   historique: HistoriqueEntry[];
-  autorisation?: { pdfCheminStockage: string; qrCodeValeur: string; dateSignature: string } | null;
+  autorisation?: { pdfCheminStockage: string; pdfNomFichier?: string | null; qrCodeValeur?: string | null; dateSignature: string } | null;
 }
 
 export const api = {
@@ -153,6 +178,10 @@ export const api = {
       request<Demande>(`/demandes/${id}`, { method: "PUT", body: JSON.stringify({ donnees }) }),
     soumettre: (id: string) => request<Demande>(`/demandes/${id}/submit`, { method: "POST" }),
     supprimer: (id: string) => request<void>(`/demandes/${id}`, { method: "DELETE" }),
+    telechargerPiece: (demandeId: string, pieceId: string, nomFichier: string) =>
+      downloadFile(`/demandes/${demandeId}/pieces/${pieceId}/telecharger`, nomFichier),
+    telechargerAttestation: (demandeId: string, nomFichier?: string) =>
+      downloadFile(`/demandes/${demandeId}/attestation`, nomFichier || "attestation.pdf"),
     repondreComplement: (id: string, donnees: Record<string, unknown>, commentaire?: string) =>
       request<Demande>(`/demandes/${id}/complement`, {
         method: "POST",
@@ -189,6 +218,22 @@ export const api = {
       if (params?.statut) query.set("statut", params.statut);
       const qs = query.toString();
       return request<DemandeAdmin[]>(`/admin/demandes${qs ? `?${qs}` : ""}`);
+    },
+    detailDemande: (id: string) => request<DemandeDetail & { demandeur?: StaffUser }>(`/admin/demandes/${id}`),
+    uploaderAttestation: async (id: string, fichier: File) => {
+      const token = getToken();
+      const form = new FormData();
+      form.append("fichier", fichier);
+      const res = await fetch(`${API_URL}/admin/demandes/${id}/attestation`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form,
+      });
+      if (!res.ok) {
+        const erreur = await res.json().catch(() => ({ erreur: res.statusText }));
+        throw new Error(typeof erreur.erreur === "string" ? erreur.erreur : "Envoi impossible");
+      }
+      return res.json();
     },
     valider: (id: string, opts?: { commentaire?: string }) =>
       request<Demande>(`/admin/demandes/${id}/valider`, { method: "POST", body: JSON.stringify(opts ?? {}) }),

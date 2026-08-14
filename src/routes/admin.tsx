@@ -10,7 +10,9 @@ import {
   type DashboardStats,
   type StaffUser,
   type TypeAutorisation,
+  type DemandeDetail,
 } from "@/lib/api";
+import { FormDataReview } from "@/components/forms/FormDataReview";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -79,6 +81,7 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   async function load(query?: string) {
     setLoading(true);
@@ -96,21 +99,6 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
   useEffect(() => {
     load();
   }, []);
-
-  async function handleAction(id: string, action: "valider" | "rejeter" | "retourner") {
-    setBusyId(id);
-    try {
-      if (action === "valider") await api.admin.valider(id);
-      if (action === "rejeter") await api.admin.rejeter(id);
-      if (action === "retourner") await api.admin.retourner(id);
-      toast.success("Dossier mis à jour");
-      await load(q);
-    } catch (err: any) {
-      toast.error("Action impossible", { description: String(err.message || err) });
-    } finally {
-      setBusyId(null);
-    }
-  }
 
   const cards = stats
     ? [
@@ -215,48 +203,39 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
           <p className="text-sm text-muted-foreground">Aucune demande trouvée.</p>
         ) : (
           <div className="bg-white ring-1 ring-black/5 shadow-sm hover:shadow-md transition-shadow duration-300 divide-y divide-border">
-            {demandes.map((d) => (
-              <div key={d.id} className="p-4 flex flex-wrap items-center gap-3 justify-between text-sm hover:bg-secondary/40 transition-colors duration-200">
-                <div className="min-w-[140px]">
-                  <div className="font-mono">{d.numero}</div>
-                  <div className="text-xs text-muted-foreground">{d.typeAutorisation?.nom}</div>
-                </div>
-                <div className="min-w-[160px]">
-                  <div>{d.demandeur?.prenom} {d.demandeur?.nom}</div>
-                  <div className="text-xs text-muted-foreground">{d.demandeur?.organisation || d.demandeur?.email}</div>
-                </div>
-                <div className="font-semibold min-w-[140px]">{STATUT_LABELS[d.statut] ?? d.statut}</div>
-                <div className="flex gap-2">
-                  {["APPROUVEE", "REJETEE"].includes(d.statut) ? (
-                    <span className="text-xs text-muted-foreground italic">Dossier clôturé</span>
-                  ) : (
-                    <>
-                      <button
-                        disabled={busyId === d.id}
-                        onClick={() => handleAction(d.id, "valider")}
-                        className="px-3 py-1.5 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
-                      >
-                        Valider
-                      </button>
-                      <button
-                        disabled={busyId === d.id}
-                        onClick={() => handleAction(d.id, "retourner")}
-                        className="px-3 py-1.5 bg-arsn-yellow text-foreground text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
-                      >
-                        Complément
-                      </button>
-                      <button
-                        disabled={busyId === d.id}
-                        onClick={() => handleAction(d.id, "rejeter")}
-                        className="px-3 py-1.5 bg-arsn-red text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-all duration-200 hover:opacity-90 hover:shadow-sm active:scale-[0.97]"
-                      >
-                        Rejeter
-                      </button>
-                    </>
+            {demandes.map((d) => {
+              const expanded = expandedId === d.id;
+              return (
+                <div key={d.id}>
+                  <button
+                    onClick={() => setExpandedId(expanded ? null : d.id)}
+                    className="w-full p-4 flex flex-wrap items-center gap-3 justify-between text-sm hover:bg-secondary/40 transition-colors duration-200 text-left"
+                  >
+                    <div className="min-w-[140px]">
+                      <div className="font-mono">{d.numero}</div>
+                      <div className="text-xs text-muted-foreground">{d.typeAutorisation?.nom}</div>
+                    </div>
+                    <div className="min-w-[160px]">
+                      <div>{d.demandeur?.prenom} {d.demandeur?.nom}</div>
+                      <div className="text-xs text-muted-foreground">{d.demandeur?.organisation || d.demandeur?.email}</div>
+                    </div>
+                    <div className="font-semibold min-w-[140px]">{STATUT_LABELS[d.statut] ?? d.statut}</div>
+                    <span className="text-xs shrink-0">{expanded ? "▲" : "▼"}</span>
+                  </button>
+                  {expanded && (
+                    <div className="min-w-0 overflow-hidden">
+                      <DemandeAdminPanel
+                        demandeId={d.id}
+                        statut={d.statut}
+                        busy={busyId === d.id}
+                        setBusy={(v) => setBusyId(v ? d.id : null)}
+                        onChanged={() => load(q)}
+                      />
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -275,6 +254,357 @@ const ROLE_LABELS: Record<string, string> = {
   SIGNATAIRE: "Signataire",
   DEMANDEUR: "Demandeur",
 };
+
+function DemandeAdminPanel({
+  demandeId,
+  statut,
+  busy,
+  setBusy,
+  onChanged,
+}: {
+  demandeId: string;
+  statut: string;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+  onChanged: () => void;
+}) {
+  const [detail, setDetail] = useState<(DemandeDetail & { demandeur?: StaffUser & { organisation?: string | null; telephone?: string | null } }) | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [modeComplement, setModeComplement] = useState(false);
+  const [piecesManquantes, setPiecesManquantes] = useState<string[]>([]);
+  const [noteComplement, setNoteComplement] = useState("");
+  const [attestationFile, setAttestationFile] = useState<File | null>(null);
+
+  async function load(silent = false) {
+    if (!silent) setLoading(true);
+    try {
+      const d = await api.admin.detailDemande(demandeId);
+      setDetail(d as any);
+    } catch (err: any) {
+      toast.error("Erreur", { description: String(err.message || err) });
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, [demandeId]);
+
+  async function handleValider() {
+    setBusy(true);
+    try {
+      await api.admin.valider(demandeId);
+      toast.success("Dossier approuvé");
+      await load(true);
+      onChanged();
+    } catch (err: any) {
+      toast.error("Action impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRejeter() {
+    const motif = window.prompt("Motif du rejet (visible par le demandeur) :");
+    if (motif === null) return;
+    setBusy(true);
+    try {
+      await api.admin.rejeter(demandeId, motif);
+      toast.success("Dossier rejeté");
+      await load(true);
+      onChanged();
+    } catch (err: any) {
+      toast.error("Action impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function togglePieceManquante(p: string) {
+    setPiecesManquantes((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
+  }
+
+  async function handleEnvoyerComplement() {
+    if (piecesManquantes.length === 0 && !noteComplement.trim()) {
+      toast.error("Précisez au moins un document manquant ou une note.");
+      return;
+    }
+    const commentaire = [
+      piecesManquantes.length > 0 ? `Documents à compléter :\n- ${piecesManquantes.join("\n- ")}` : null,
+      noteComplement.trim() || null,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    setBusy(true);
+    try {
+      await api.admin.retourner(demandeId, commentaire);
+      toast.success("Demande de complément envoyée au demandeur");
+      setModeComplement(false);
+      setPiecesManquantes([]);
+      setNoteComplement("");
+      await load(true);
+      onChanged();
+    } catch (err: any) {
+      toast.error("Action impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleEnvoyerMessage() {
+    if (!message.trim()) return;
+    setBusy(true);
+    try {
+      await api.demandes.envoyerMessage(demandeId, message.trim());
+      setMessage("");
+      await load(true);
+    } catch (err: any) {
+      toast.error("Envoi impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleTelechargerPiece(pieceId: string, nomFichier: string) {
+    try {
+      await api.demandes.telechargerPiece(demandeId, pieceId, nomFichier);
+    } catch (err: any) {
+      toast.error("Téléchargement impossible", { description: String(err.message || err) });
+    }
+  }
+
+  async function handleUploadAttestation() {
+    if (!attestationFile) return;
+    setBusy(true);
+    try {
+      await api.admin.uploaderAttestation(demandeId, attestationFile);
+      toast.success("Attestation envoyée au demandeur");
+      setAttestationFile(null);
+      await load(true);
+    } catch (err: any) {
+      toast.error("Envoi impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (loading || !detail) {
+    return <div className="p-6 text-sm text-muted-foreground">Chargement du dossier…</div>;
+  }
+
+  const estFinal = ["APPROUVEE", "REJETEE"].includes(statut);
+
+  return (
+    <div className="p-6 bg-secondary/20 space-y-8 min-w-0 overflow-hidden">
+      {/* Demandeur */}
+      <div className="grid sm:grid-cols-2 gap-4 text-sm">
+        <div>
+          <p className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">Demandeur</p>
+          <p>{detail.demandeur?.prenom} {detail.demandeur?.nom}</p>
+          <p className="text-muted-foreground">{detail.demandeur?.email}</p>
+        </div>
+        <div>
+          <p className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">Dossier</p>
+          <p className="font-mono">{detail.numero}</p>
+        </div>
+      </div>
+
+      {/* Formulaire rempli */}
+      <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg min-w-0 overflow-hidden">
+        {detail.typeAutorisation?.formulaireSchema?.sections?.length ? (
+          <FormDataReview schema={detail.typeAutorisation.formulaireSchema} donnees={detail.donnees ?? {}} />
+        ) : (
+          <p className="text-sm text-muted-foreground">Aucune donnée de formulaire pour ce dossier.</p>
+        )}
+      </div>
+
+      {/* Pièces justificatives */}
+      <div className="p-4 bg-white ring-1 ring-black/5 rounded-lg">
+        <h4 className="font-mono uppercase tracking-[0.15em] text-xs mb-3">Pièces justificatives</h4>
+        {detail.pieces.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aucune pièce jointe pour l'instant.</p>
+        ) : (
+          <ul className="space-y-2">
+            {detail.pieces.map((p) => (
+              <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                <span className="truncate min-w-0">{p.nomFichier}</span>
+                <button
+                  onClick={() => handleTelechargerPiece(p.id, p.nomFichier)}
+                  className="shrink-0 text-xs font-semibold text-arsn-blue hover:underline"
+                >
+                  Télécharger
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Attestation d'autorisation (dossier approuvé) */}
+      {statut === "APPROUVEE" && (
+        <div className="p-4 bg-white ring-1 ring-black/5 rounded-lg">
+          <h4 className="font-mono uppercase tracking-[0.15em] text-xs mb-3">Attestation d'autorisation</h4>
+          {detail.autorisation ? (
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span>
+                {detail.autorisation.pdfNomFichier || "attestation.pdf"} — envoyée le{" "}
+                {new Date(detail.autorisation.dateSignature).toLocaleDateString("fr-FR")}
+              </span>
+              <button
+                onClick={() => api.demandes.telechargerAttestation(demandeId, detail.autorisation?.pdfNomFichier || undefined)}
+                className="shrink-0 text-xs font-semibold text-arsn-blue hover:underline"
+              >
+                Télécharger
+              </button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground mb-3">
+              Aucune attestation envoyée pour l'instant. Le demandeur ne pourra la voir dans son compte qu'une fois
+              déposée ici.
+            </p>
+          )}
+          <div className="flex items-center gap-3 mt-3">
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setAttestationFile(e.target.files?.[0] ?? null)}
+              className="text-xs"
+            />
+            <button
+              disabled={!attestationFile || busy}
+              onClick={handleUploadAttestation}
+              className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200"
+            >
+              {detail.autorisation ? "Remplacer" : "Envoyer au demandeur"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Messagerie */}
+      <div className="p-4 bg-white ring-1 ring-black/5 rounded-lg">
+        <h4 className="font-mono uppercase tracking-[0.15em] text-xs mb-3">Échanger avec le demandeur</h4>
+        <div className="space-y-2 mb-3 max-h-56 overflow-y-auto">
+          {detail.historique.filter((h) => h.action === "MESSAGE").length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucun message pour l'instant.</p>
+          ) : (
+            detail.historique
+              .filter((h) => h.action === "MESSAGE")
+              .map((h) => (
+                <div key={h.id} className="text-sm p-2 rounded-lg bg-secondary/40">
+                  <span className="font-semibold">{h.parUser?.prenom} :</span> {h.commentaire}
+                </div>
+              ))
+          )}
+        </div>
+        <div className="flex gap-2">
+          <input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Écrire un message…"
+            className="flex-1 border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+          />
+          <button
+            disabled={busy || !message.trim()}
+            onClick={handleEnvoyerMessage}
+            className="px-4 py-2 bg-foreground text-white text-xs font-semibold rounded-lg disabled:opacity-50"
+          >
+            Envoyer
+          </button>
+        </div>
+      </div>
+
+      {/* Actions de traitement */}
+      {!estFinal && (
+        <div className="p-4 bg-white ring-1 ring-black/5 rounded-lg">
+          {!modeComplement ? (
+            <div className="flex gap-2">
+              <button
+                disabled={busy}
+                onClick={handleValider}
+                className="px-4 py-2 bg-arsn-green text-white text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200"
+              >
+                Valider
+              </button>
+              <button
+                disabled={busy}
+                onClick={() => setModeComplement(true)}
+                className="px-4 py-2 bg-arsn-yellow text-foreground text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200"
+              >
+                Demander un complément
+              </button>
+              <button
+                disabled={busy}
+                onClick={handleRejeter}
+                className="px-4 py-2 bg-arsn-red text-white text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200"
+              >
+                Rejeter
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4 animate-reveal">
+              <h4 className="font-mono uppercase tracking-[0.15em] text-xs">
+                Documents à compléter
+              </h4>
+              {detail.typeAutorisation?.piecesRequises && detail.typeAutorisation.piecesRequises.length > 0 ? (
+                <ul className="space-y-2">
+                  {detail.typeAutorisation.piecesRequises.map((p) => (
+                    <li key={p}>
+                      <label className="flex items-start gap-2 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={piecesManquantes.includes(p)}
+                          onChange={() => togglePieceManquante(p)}
+                          className="mt-0.5"
+                        />
+                        {p}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Aucune liste de pièces définie pour ce type — précisez directement dans la note ci-dessous.
+                </p>
+              )}
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
+                  Note complémentaire pour le demandeur
+                </label>
+                <textarea
+                  value={noteComplement}
+                  onChange={(e) => setNoteComplement(e.target.value)}
+                  rows={3}
+                  placeholder="Précisez ce qui manque ou doit être corrigé…"
+                  className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  disabled={busy}
+                  onClick={() => setModeComplement(false)}
+                  className="px-4 py-2 ring-1 ring-border text-xs font-semibold rounded-lg hover:bg-secondary/40 transition-all duration-200"
+                >
+                  Annuler
+                </button>
+                <button
+                  disabled={busy}
+                  onClick={handleEnvoyerComplement}
+                  className="px-4 py-2 bg-arsn-yellow text-foreground text-xs font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200"
+                >
+                  Envoyer la demande de complément
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function UsersPanel() {
   const [users, setUsers] = useState<StaffUser[]>([]);
