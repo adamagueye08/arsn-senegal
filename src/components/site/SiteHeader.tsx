@@ -1,25 +1,42 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-const NAV = [
-  { to: "/", key: "nav.home" },
-  { to: "/l-arsn", key: "nav.arsn" },
-  { to: "/reglementation", key: "nav.regulation" },
-  { to: "/autorisation", key: "nav.authorization" },
-  { to: "/inspection", key: "nav.inspection" },
-  { to: "/dosimetrie", key: "nav.dosimetry" },
-  { to: "/information", key: "nav.information" },
-  { to: "/videotheque", key: "nav.videotheque" },
-  { to: "/contact", key: "nav.contact" },
-  { to: "/espace-demandeur", key: "nav.account" },
-] as const;
+type NavLeaf = { to: string; key: string };
+type NavItem = NavLeaf | { label: string; children: NavLeaf[] };
+
+function useNavItems(): NavItem[] {
+  const { t } = useLang();
+  return [
+    { to: "/l-arsn", key: "nav.arsn" },
+    { to: "/reglementation", key: "nav.regulation" },
+    { to: "/autorisation", key: "nav.authorization" },
+    { to: "/inspection", key: "nav.inspection" },
+    {
+      label: t("nav.services"),
+      children: [
+        { to: "/espace-demandeur", key: "nav.account" },
+        { to: "/dosimetrie", key: "nav.dosimetry" },
+      ],
+    },
+    {
+      label: t("nav.publications"),
+      children: [
+        { to: "/information", key: "nav.articles" },
+        { to: "/videotheque", key: "nav.videotheque" },
+      ],
+    },
+    { to: "/contact", key: "nav.contact" },
+  ];
+}
 
 export function SiteHeader() {
   const { t, lang, setLang } = useLang();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [mobileSubOpen, setMobileSubOpen] = useState<string | null>(null);
+  const NAV = useNavItems();
 
   return (
     <>
@@ -76,20 +93,50 @@ export function SiteHeader() {
             <span className="sr-only">ARSN — Autorité Sénégalaise de Radioprotection et de Sûreté Nucléaire</span>
           </Link>
 
-
           <div className="hidden xl:flex items-center gap-6">
             {NAV.map((item) => {
-              const active =
-                item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+              if ("children" in item) {
+                const active = item.children.some((c) => pathname.startsWith(c.to));
+                return (
+                  <div key={item.label} className="relative group">
+                    <button
+                      className={
+                        "flex items-center gap-1 text-[12px] font-semibold uppercase tracking-wide transition-colors " +
+                        (active ? "border-b-2 border-foreground pb-1" : "hover:text-arsn-green")
+                      }
+                    >
+                      {item.label}
+                      <ChevronDown className="w-3 h-3 group-hover:rotate-180 transition-transform duration-200" />
+                    </button>
+                    <div className="absolute left-0 top-full pt-3 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200">
+                      <div className="bg-white ring-1 ring-black/5 shadow-lg rounded-lg py-2 min-w-[200px]">
+                        {item.children.map((c) => (
+                          <Link
+                            key={c.to}
+                            to={c.to}
+                            className={
+                              "block px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wide transition-colors " +
+                              (pathname.startsWith(c.to)
+                                ? "text-arsn-green bg-arsn-green/5"
+                                : "hover:bg-secondary/60 hover:text-arsn-green")
+                            }
+                          >
+                            {t(c.key)}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              const active = pathname.startsWith(item.to);
               return (
                 <Link
                   key={item.to}
                   to={item.to}
                   className={
                     "text-[12px] font-semibold uppercase tracking-wide transition-colors " +
-                    (active
-                      ? "border-b-2 border-foreground pb-1"
-                      : "hover:text-arsn-green")
+                    (active ? "border-b-2 border-foreground pb-1" : "hover:text-arsn-green")
                   }
                 >
                   {t(item.key)}
@@ -111,8 +158,46 @@ export function SiteHeader() {
           <div className="xl:hidden border-t border-border bg-background">
             <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
               {NAV.map((item) => {
-                const active =
-                  item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+                if ("children" in item) {
+                  const subOpen = mobileSubOpen === item.label;
+                  return (
+                    <div key={item.label}>
+                      <button
+                        onClick={() => setMobileSubOpen(subOpen ? null : item.label)}
+                        className="w-full flex items-center justify-between px-3 py-3 text-sm font-semibold uppercase tracking-wide rounded hover:bg-black/5"
+                      >
+                        {item.label}
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${subOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {subOpen && (
+                        <div className="pl-4 flex flex-col gap-1 animate-reveal">
+                          {item.children.map((c) => {
+                            const active = pathname.startsWith(c.to);
+                            return (
+                              <Link
+                                key={c.to}
+                                to={c.to}
+                                onClick={() => {
+                                  setOpen(false);
+                                  setMobileSubOpen(null);
+                                }}
+                                className={
+                                  "px-3 py-2.5 text-sm font-medium rounded " +
+                                  (active ? "bg-foreground text-white" : "hover:bg-black/5")
+                                }
+                              >
+                                {t(c.key)}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                const active = pathname.startsWith(item.to);
                 return (
                   <Link
                     key={item.to}

@@ -82,6 +82,17 @@ function Page() {
               </div>
             );
           })}
+          <div className="sm:col-span-2 ring-1 ring-black/5 overflow-hidden rounded-sm h-64">
+            <iframe
+              title={lang === "en" ? "ARSN office location" : "Localisation du siège de l'ARSN"}
+              src="https://www.google.com/maps?q=Espace+R%C3%A9sidence+Hann,+Scat+Urbam+Maristes,+Dakar,+S%C3%A9n%C3%A9gal&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
 
         <form

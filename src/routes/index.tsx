@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
-import { ArrowRight, FileText, Download } from "lucide-react";
+import { ArrowRight, FileText, Download, ShieldAlert, ClipboardList, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import heroLab from "@/assets/hero-lab.jpg";
 import newsConference from "@/assets/news-conference.jpg";
@@ -44,48 +45,64 @@ function Home() {
   return (
     <div>
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
-        {/* Editorial Hero */}
-        <section className="grid lg:grid-cols-12 gap-8 lg:gap-12 mb-16 md:mb-20 animate-reveal">
-          <div className="lg:col-span-8">
-            <div className="space-y-6">
-              <span className="inline-block px-3 py-1 bg-arsn-green/10 text-arsn-green text-[10px] font-bold tracking-widest uppercase rounded">
+        {/* Hero */}
+        <section className="relative grid lg:grid-cols-12 gap-8 lg:gap-12 mb-16 md:mb-24 pt-4 md:pt-8">
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            <div className="space-y-7">
+              <span
+                className="animate-reveal inline-block px-3 py-1 bg-arsn-green/10 text-arsn-green text-[10px] font-bold tracking-widest uppercase rounded"
+                style={{ animationDelay: "0ms" }}
+              >
                 {t("home.hero.tag")}
               </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-[1.1] text-balance">
+              <h2
+                className="animate-reveal text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.05] text-balance"
+                style={{ animationDelay: "80ms" }}
+              >
                 {t("home.hero.title.1")}{" "}
-                <span className="italic">{t("home.hero.title.emph")}</span>{" "}
+                <span className="italic text-arsn-blue">{t("home.hero.title.emph")}</span>{" "}
                 {t("home.hero.title.2")}
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed text-pretty">
+              <p
+                className="animate-reveal text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed text-pretty"
+                style={{ animationDelay: "160ms" }}
+              >
                 {t("home.hero.desc")}
               </p>
-              <div className="pt-4">
-                <a
-                  href={DOCS.rapportAnnuel.url}
-                  download={DOCS.rapportAnnuel.filename}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    toast.success("Téléchargement lancé", {
-                      description: `${DOCS.rapportAnnuel.label} · ${formatSize(DOCS.rapportAnnuel.size)}`,
-                    })
-                  }
-                  className="inline-flex px-8 py-4 bg-foreground text-white font-semibold text-sm hover:bg-foreground/90 transition-all rounded-sm items-center gap-3 group"
-                >
-                  {t("home.hero.cta")}
-                  <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                </a>
-              </div>
 
+              {/* 3 boutons principaux */}
+              <div
+                className="animate-reveal flex flex-wrap gap-3 pt-2"
+                style={{ animationDelay: "260ms" }}
+              >
+                <Link
+                  to="/espace-demandeur"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-arsn-blue text-white font-semibold text-sm rounded-lg hover:opacity-90 hover:shadow-lg hover:shadow-arsn-blue/20 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <ClipboardList className="w-4 h-4" />
+                  {t("nav.hero.reqAuth")}
+                </Link>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white ring-1 ring-arsn-red/30 text-arsn-red font-semibold text-sm rounded-lg hover:bg-arsn-red/5 transition-all duration-200 active:scale-[0.98]"
+                >
+                  <ShieldAlert className="w-4 h-4" />
+                  {t("nav.hero.reportIncident")}
+                </Link>
+                <FormsDownloadButton />
+              </div>
             </div>
           </div>
-          <div className="lg:col-span-4">
+          <div
+            className="animate-reveal lg:col-span-5"
+            style={{ animationDelay: "120ms" }}
+          >
             <img
               src={heroLab}
               alt="Laboratoire scientifique ARSN"
               width={800}
               height={1000}
-              className="w-full aspect-[4/5] object-cover ring-1 ring-black/5 rounded-sm"
+              className="w-full aspect-[4/5] object-cover ring-1 ring-black/5 rounded-lg shadow-xl"
             />
           </div>
         </section>
@@ -202,6 +219,54 @@ function Home() {
           </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function FormsDownloadButton() {
+  const [open, setOpen] = useState(false);
+  const forms: { key: string; doc: DocMeta }[] = [
+    { key: "Transport", doc: DOCS.formTransport },
+    { key: "Détention", doc: DOCS.formDetention },
+    { key: "Exportation", doc: DOCS.formExport },
+    { key: "Importation", doc: DOCS.formImport },
+  ];
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white ring-1 ring-border text-foreground font-semibold text-sm rounded-lg hover:bg-secondary/50 transition-all duration-200 active:scale-[0.98]"
+      >
+        <Download className="w-4 h-4" />
+        Télécharger un formulaire
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full mt-2 z-50 bg-white ring-1 ring-black/5 shadow-lg rounded-lg py-2 min-w-[260px] animate-reveal">
+            {forms.map(({ key, doc }) => (
+              <a
+                key={key}
+                href={doc.url}
+                download={doc.filename}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  setOpen(false);
+                  toast.success("Téléchargement lancé", { description: `${doc.label} · ${formatSize(doc.size)}` });
+                }}
+                className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm hover:bg-secondary/50 transition-colors duration-150"
+              >
+                <span>{key}</span>
+                <FileText className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              </a>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
