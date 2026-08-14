@@ -118,7 +118,7 @@ export function DynamicRequestForm({
         </div>
       )}
 
-      <div className="grid md:grid-cols-[220px_1fr] gap-8">
+      <div className="grid md:grid-cols-[220px_1fr] gap-8 min-w-0">
       {/* Rail d'étapes numérotées — desktop */}
       <nav className="hidden md:block relative">
         <div className="absolute left-[15px] top-2 bottom-2 w-px bg-border" aria-hidden />
@@ -163,15 +163,38 @@ export function DynamicRequestForm({
         </ol>
       </nav>
 
-      {/* Barre de progression compacte — mobile */}
-      <div className="md:hidden">
-        <div className="flex items-center justify-between text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
-          <span>
-            Étape {step + 1} / {totalSteps}
-          </span>
-          <span>{isFinalStep ? "Pièces & envoi" : sections[step]?.titre}</span>
+      {/* Rail d'étapes — mobile : pastilles numérotées scrollables horizontalement */}
+      <div className="md:hidden min-w-0">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+          {[...sections.map((s) => s.titre), "Pièces & envoi"].map((titre, i) => {
+            const active = i === step;
+            const done = i < step;
+            return (
+              <button
+                key={titre}
+                type="button"
+                onClick={() => goTo(i)}
+                className={`shrink-0 flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 rounded-full ring-1 text-xs font-medium transition-all duration-200 ${
+                  done
+                    ? "bg-arsn-green/10 ring-arsn-green/40 text-arsn-green"
+                    : active
+                    ? "bg-arsn-blue ring-arsn-blue text-white"
+                    : "bg-white ring-border text-muted-foreground"
+                }`}
+              >
+                <span
+                  className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-semibold ${
+                    done ? "bg-arsn-green text-white" : active ? "bg-white/20" : "bg-secondary"
+                  }`}
+                >
+                  {done ? "✓" : i + 1}
+                </span>
+                <span className="whitespace-nowrap max-w-[9rem] truncate">{titre}</span>
+              </button>
+            );
+          })}
         </div>
-        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+        <div className="h-1 bg-secondary rounded-full overflow-hidden mt-2">
           <div
             className="h-full bg-arsn-green transition-all duration-300"
             style={{ width: `${((step + 1) / totalSteps) * 100}%` }}
@@ -179,13 +202,13 @@ export function DynamicRequestForm({
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 min-w-0">
         {!isFinalStep ? (
           <div key={step} className="animate-reveal">
             <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-arsn-blue mb-1">
               Section {String(step + 1).padStart(2, "0")}
             </p>
-            <h4 className="text-xl font-serif mb-1">{sections[step].titre}</h4>
+            <h4 className="text-xl font-serif mb-1 break-words">{sections[step].titre}</h4>
             <div className="h-px bg-border mb-6" />
             <div className="grid sm:grid-cols-2 gap-5">
               {sections[step].champs.map((champ) => (
@@ -407,9 +430,9 @@ function FieldRenderer({
       const rows = Array.isArray(value) ? (value as Record<string, string>[]) : [];
       const colonnes = champ.colonnes ?? [];
       return (
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-2 min-w-0">
           {label}
-          <div className="border border-border rounded-lg overflow-x-auto">
+          <div className="border border-border rounded-lg overflow-x-auto max-w-full">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-secondary/40">

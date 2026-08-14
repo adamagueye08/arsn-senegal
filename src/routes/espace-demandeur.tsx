@@ -277,23 +277,57 @@ function DemandeRow({
   onToggle: () => void;
   onChanged: () => void;
 }) {
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!window.confirm("Supprimer définitivement ce brouillon ? Cette action est irréversible.")) return;
+    setDeleting(true);
+    try {
+      await api.demandes.supprimer(demande.id);
+      toast.success("Brouillon supprimé");
+      onChanged();
+    } catch (err: any) {
+      toast.error("Suppression impossible", { description: String(err.message || err) });
+      setDeleting(false);
+    }
+  }
+
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
       className="ring-1 ring-black/5 shadow-sm rounded-lg overflow-hidden animate-reveal"
     >
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 text-sm hover:bg-secondary/40 transition-colors duration-200 text-left"
-      >
-        <span className="font-mono">{demande.numero}</span>
-        <span className="text-muted-foreground">{demande.typeAutorisation?.nom}</span>
-        <span className="font-semibold">
-          {c.statusLabels[demande.statut as keyof typeof c.statusLabels] ?? demande.statut}
-        </span>
-        <span className="text-xs">{expanded ? "▲" : "▼"}</span>
-      </button>
-      {expanded && <DemandeDetailPanel demandeId={demande.id} statut={demande.statut} onChanged={onChanged} />}
+      <div className="w-full flex items-center gap-2 min-w-0">
+        <button
+          onClick={onToggle}
+          className="flex-1 flex items-center justify-between gap-2 p-4 text-sm hover:bg-secondary/40 transition-colors duration-200 text-left min-w-0"
+        >
+          <span className="font-mono shrink-0">{demande.numero}</span>
+          <span className="text-muted-foreground truncate min-w-0 flex-1 text-center">
+            {demande.typeAutorisation?.nom}
+          </span>
+          <span className="font-semibold shrink-0 whitespace-nowrap">
+            {c.statusLabels[demande.statut as keyof typeof c.statusLabels] ?? demande.statut}
+          </span>
+          <span className="text-xs shrink-0">{expanded ? "▲" : "▼"}</span>
+        </button>
+        {demande.statut === "BROUILLON" && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            title="Supprimer ce brouillon"
+            className="shrink-0 mr-3 w-8 h-8 rounded-lg flex items-center justify-center text-arsn-red hover:bg-arsn-red/10 transition-colors duration-200 disabled:opacity-50"
+          >
+            🗑
+          </button>
+        )}
+      </div>
+      {expanded && (
+        <div className="min-w-0 overflow-hidden">
+          <DemandeDetailPanel demandeId={demande.id} statut={demande.statut} onChanged={onChanged} />
+        </div>
+      )}
     </div>
   );
 }
@@ -467,7 +501,7 @@ function DemandeDetailPanel({
 
       {(statut === "BROUILLON" || statut === "COMPLEMENT_REQUIS") && (
         detail.typeAutorisation?.formulaireSchema?.sections?.length ? (
-          <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg">
+          <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg min-w-0 overflow-hidden">
             <DynamicRequestForm
               schema={detail.typeAutorisation.formulaireSchema}
               initialValue={detail.donnees ?? {}}

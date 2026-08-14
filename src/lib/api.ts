@@ -45,6 +45,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       typeof erreur.erreur === "string" ? erreur.erreur : JSON.stringify(erreur.erreur ?? "Erreur inconnue")
     );
   }
+  if (res.status === 204) return undefined as T;
   return res.json();
 }
 
@@ -151,6 +152,7 @@ export const api = {
     modifier: (id: string, donnees: Record<string, unknown>) =>
       request<Demande>(`/demandes/${id}`, { method: "PUT", body: JSON.stringify({ donnees }) }),
     soumettre: (id: string) => request<Demande>(`/demandes/${id}/submit`, { method: "POST" }),
+    supprimer: (id: string) => request<void>(`/demandes/${id}`, { method: "DELETE" }),
     repondreComplement: (id: string, donnees: Record<string, unknown>, commentaire?: string) =>
       request<Demande>(`/demandes/${id}/complement`, {
         method: "POST",
