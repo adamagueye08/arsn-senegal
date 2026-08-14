@@ -484,6 +484,7 @@ function DemandeDetailPanel({
               piecesRequises={detail.typeAutorisation.piecesRequises}
               pieces={detail.pieces}
               busy={busy}
+              numeroDossier={detail.numero}
               onSaveStep={handleSaveStep}
               onSubmitFinal={handleSubmitDynamicForm}
             />

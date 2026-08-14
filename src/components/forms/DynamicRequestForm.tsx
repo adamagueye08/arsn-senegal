@@ -17,6 +17,7 @@ export function DynamicRequestForm({
   pieces,
   busy,
   readOnly,
+  numeroDossier,
   onSaveStep,
   onSubmitFinal,
 }: {
@@ -26,6 +27,7 @@ export function DynamicRequestForm({
   pieces?: { id: string; nomFichier: string }[];
   busy?: boolean;
   readOnly?: boolean;
+  numeroDossier?: string;
   onSaveStep: (data: FormData) => void | Promise<void>;
   onSubmitFinal: (data: FormData) => void | Promise<void>;
 }) {
@@ -54,12 +56,35 @@ export function DynamicRequestForm({
   }
 
   const isFinalStep = step === totalSteps - 1;
+  const progressPct = totalSteps > 1 ? (step / (totalSteps - 1)) * 100 : 0;
 
   return (
-    <div className="grid md:grid-cols-[220px_1fr] gap-8">
+    <div className="space-y-6">
+      {/* En-tête façon document officiel : référence + numéro de dossier */}
+      {(schema.reference || numeroDossier) && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-4 border-b border-border">
+          {schema.reference && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded ring-1 ring-arsn-blue/30 bg-arsn-blue/5 text-[11px] font-mono font-semibold tracking-wider text-arsn-blue">
+              RÉF. {schema.reference}
+            </span>
+          )}
+          {numeroDossier && (
+            <span className="text-[11px] font-mono tracking-wider text-muted-foreground">
+              DOSSIER {numeroDossier}
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="grid md:grid-cols-[220px_1fr] gap-8">
       {/* Rail d'étapes numérotées — desktop */}
       <nav className="hidden md:block relative">
         <div className="absolute left-[15px] top-2 bottom-2 w-px bg-border" aria-hidden />
+        <div
+          className="absolute left-[15px] top-2 w-px bg-arsn-green transition-all duration-500 ease-out"
+          style={{ height: `calc((100% - 1rem) * ${progressPct / 100})` }}
+          aria-hidden
+        />
         <ol className="space-y-1">
           {[...sections.map((s) => s.titre), "Pièces & envoi"].map((titre, i) => {
             const active = i === step;
@@ -72,11 +97,11 @@ export function DynamicRequestForm({
                   className="relative z-10 flex items-start gap-3 w-full text-left py-2 group"
                 >
                   <span
-                    className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-semibold ring-1 transition-colors duration-200 ${
+                    className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-semibold ring-1 transition-all duration-300 ${
                       done
                         ? "bg-arsn-green text-white ring-arsn-green"
                         : active
-                        ? "bg-arsn-blue text-white ring-arsn-blue"
+                        ? "bg-arsn-blue text-white ring-arsn-blue scale-110 shadow-md shadow-arsn-blue/20"
                         : "bg-white text-muted-foreground ring-border group-hover:ring-arsn-blue-light"
                     }`}
                   >
@@ -114,8 +139,11 @@ export function DynamicRequestForm({
 
       <div className="space-y-6">
         {!isFinalStep ? (
-          <div className="animate-reveal">
-            <h4 className="text-lg font-serif mb-1">{sections[step].titre}</h4>
+          <div key={step} className="animate-reveal">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-arsn-blue mb-1">
+              Section {String(step + 1).padStart(2, "0")}
+            </p>
+            <h4 className="text-xl font-serif mb-1">{sections[step].titre}</h4>
             <div className="h-px bg-border mb-6" />
             <div className="grid sm:grid-cols-2 gap-5">
               {sections[step].champs.map((champ) => (
@@ -130,9 +158,12 @@ export function DynamicRequestForm({
             </div>
           </div>
         ) : (
-          <div className="animate-reveal space-y-6">
+          <div key="final" className="animate-reveal space-y-6">
             <div>
-              <h4 className="text-lg font-serif mb-1">Pièces & envoi</h4>
+              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-arsn-blue mb-1">
+                Section {String(totalSteps).padStart(2, "0")}
+              </p>
+              <h4 className="text-xl font-serif mb-1">Pièces & envoi</h4>
               <div className="h-px bg-border mb-6" />
               {piecesRequises && piecesRequises.length > 0 && (
                 <div>
@@ -208,6 +239,7 @@ export function DynamicRequestForm({
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
