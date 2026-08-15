@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { ArrowRight, FileText, Download, ShieldAlert, ClipboardList, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import heroLabFull from "@/assets/hero-lab-full.jpg";
 import heroLab from "@/assets/hero-lab.jpg";
 import newsConference from "@/assets/news-conference.jpg";
 import newsVisit from "@/assets/news-visit.jpg";
@@ -44,68 +46,79 @@ function Home() {
 
   return (
     <div>
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
-        {/* Hero */}
-        <section className="relative grid lg:grid-cols-12 gap-8 lg:gap-12 mb-16 md:mb-24 pt-4 md:pt-8">
-          <div className="lg:col-span-7 flex flex-col justify-center">
-            <div className="space-y-7">
-              <span
-                className="animate-reveal inline-block px-3 py-1 bg-arsn-green/10 text-arsn-green text-[10px] font-bold tracking-widest uppercase rounded"
-                style={{ animationDelay: "0ms" }}
-              >
-                {t("home.hero.tag")}
-              </span>
-              <h2
-                className="animate-reveal text-5xl md:text-6xl lg:text-7xl font-serif leading-[1.05] text-balance"
-                style={{ animationDelay: "80ms" }}
-              >
-                {t("home.hero.title.1")}{" "}
-                <span className="italic text-arsn-blue">{t("home.hero.title.emph")}</span>{" "}
-                {t("home.hero.title.2")}
-              </h2>
-              <p
-                className="animate-reveal text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed text-pretty"
-                style={{ animationDelay: "160ms" }}
-              >
-                {t("home.hero.desc")}
-              </p>
+      {/* Hero plein écran — occupe tout l'écran avant le scroll */}
+      <section className="relative w-full min-h-[88vh] flex items-end overflow-hidden">
+        {[heroLabFull, heroLab, newsRadiology, newsVisit].map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            aria-hidden={i !== 0}
+            className="arsn-hero-slide absolute inset-0 w-full h-full object-cover"
+            style={{ animationDelay: `${-(i * 6)}s` }}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
 
-              {/* 3 boutons principaux */}
-              <div
-                className="animate-reveal flex flex-wrap gap-3 pt-2"
-                style={{ animationDelay: "260ms" }}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full pb-16 md:pb-24">
+          <div className="max-w-3xl space-y-6">
+            <span
+              className="animate-reveal inline-block px-3 py-1 bg-arsn-green/20 ring-1 ring-arsn-green/50 text-arsn-green text-[10px] font-bold tracking-widest uppercase rounded"
+              style={{ animationDelay: "0ms" }}
+            >
+              {t("home.hero.tag")}
+            </span>
+            <h2
+              className="animate-reveal text-4xl md:text-6xl lg:text-7xl font-serif leading-[1.05] text-balance text-white"
+              style={{ animationDelay: "80ms" }}
+            >
+              {t("home.hero.title.1")}{" "}
+              <span className="italic text-arsn-green">{t("home.hero.title.emph")}</span>{" "}
+              {t("home.hero.title.2")}
+            </h2>
+            <p
+              className="animate-reveal text-lg md:text-xl text-white/80 max-w-2xl leading-relaxed text-pretty"
+              style={{ animationDelay: "160ms" }}
+            >
+              {t("home.hero.desc")}
+            </p>
+
+            {/* 3 boutons principaux */}
+            <div
+              className="animate-reveal flex flex-wrap gap-3 pt-2"
+              style={{ animationDelay: "260ms" }}
+            >
+              <Link
+                to="/espace-demandeur"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-arsn-blue text-white font-semibold text-sm rounded-lg hover:opacity-90 hover:shadow-lg hover:shadow-arsn-blue/30 transition-all duration-200 active:scale-[0.98]"
               >
-                <Link
-                  to="/espace-demandeur"
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-arsn-blue text-white font-semibold text-sm rounded-lg hover:opacity-90 hover:shadow-lg hover:shadow-arsn-blue/20 transition-all duration-200 active:scale-[0.98]"
-                >
-                  <ClipboardList className="w-4 h-4" />
-                  {t("nav.hero.reqAuth")}
-                </Link>
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white ring-1 ring-arsn-red/30 text-arsn-red font-semibold text-sm rounded-lg hover:bg-arsn-red/5 transition-all duration-200 active:scale-[0.98]"
-                >
-                  <ShieldAlert className="w-4 h-4" />
-                  {t("nav.hero.reportIncident")}
-                </Link>
-                <FormsDownloadButton />
-              </div>
+                <ClipboardList className="w-4 h-4" />
+                {t("nav.hero.reqAuth")}
+              </Link>
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 backdrop-blur-sm ring-1 ring-white/40 text-white font-semibold text-sm rounded-lg hover:bg-white/20 transition-all duration-200 active:scale-[0.98]"
+              >
+                <ShieldAlert className="w-4 h-4" />
+                {t("nav.hero.reportIncident")}
+              </Link>
+              <FormsDownloadButton />
             </div>
           </div>
-          <div
-            className="animate-reveal lg:col-span-5"
-            style={{ animationDelay: "120ms" }}
-          >
-            <img
-              src={heroLab}
-              alt="Laboratoire scientifique ARSN"
-              width={800}
-              height={1000}
-              className="w-full aspect-[4/5] object-cover ring-1 ring-black/5 rounded-lg shadow-xl"
-            />
+        </div>
+
+        {/* Repère de scroll */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 animate-bounce hidden md:block">
+          <div className="w-6 h-10 rounded-full border-2 border-white/50 flex items-start justify-center p-1.5">
+            <div className="w-1 h-2 bg-white/70 rounded-full" />
           </div>
-        </section>
+        </div>
+      </section>
+
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
+        {/* Chiffres clés (tableau de bord public) */}
+        <PublicStats />
+
         {/* Actualités défilantes */}
         <NewsSlider />
 
@@ -220,6 +233,58 @@ function Home() {
         </section>
       </main>
     </div>
+  );
+}
+
+function PublicStats() {
+  const { t, lang } = useLang();
+  const [stats, setStats] = useState<{
+    autorisationsDelivrees: number;
+    dossiersTraites: number;
+    etablissementsControles: number;
+  } | null>(null);
+
+  useEffect(() => {
+    api.statsPubliques
+      .obtenir()
+      .then(setStats)
+      .catch(() => {
+        // Silencieux : la page d'accueil reste utilisable sans ces chiffres.
+      });
+  }, []);
+
+  const items = [
+    {
+      value: stats?.autorisationsDelivrees,
+      label: lang === "en" ? "Licences issued" : "Autorisations délivrées",
+    },
+    {
+      value: stats?.dossiersTraites,
+      label: lang === "en" ? "Applications processed" : "Dossiers traités",
+    },
+    {
+      value: stats?.etablissementsControles,
+      label: lang === "en" ? "Facilities inspected" : "Établissements contrôlés",
+    },
+  ];
+
+  return (
+    <section className="grid grid-cols-3 gap-4 md:gap-8 mb-16 md:mb-20 animate-reveal">
+      {items.map((item, i) => (
+        <div key={item.label} className="text-center md:text-left border-t-2 border-foreground pt-4">
+          <div className="text-4xl md:text-6xl font-serif tabular-nums">
+            {item.value === undefined ? (
+              <span className="inline-block w-16 md:w-24 h-10 md:h-14 arsn-skeleton rounded align-middle" />
+            ) : (
+              item.value
+            )}
+          </div>
+          <p className="text-xs md:text-sm text-muted-foreground mt-2 uppercase tracking-wide font-mono">
+            {item.label}
+          </p>
+        </div>
+      ))}
+    </section>
   );
 }
 

@@ -6,7 +6,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-white border-t border-border mt-20 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="grid lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid lg:grid-cols-4 gap-12 mb-12">
           <div className="lg:col-span-2">
             <div className="mb-6">
               <img
@@ -72,6 +72,18 @@ export function SiteFooter() {
               {t("footer.hours.time")}
             </div>
           </div>
+        </div>
+
+        <div className="mb-16 ring-1 ring-black/5 overflow-hidden rounded-sm h-56">
+          <iframe
+            title="Localisation du siège de l'ARSN"
+            src="https://www.google.com/maps?q=Espace+R%C3%A9sidence+Hann,+Scat+Urbam+Maristes,+Dakar,+S%C3%A9n%C3%A9gal&output=embed"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
         </div>
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
           <span>{t("footer.rights")}</span>

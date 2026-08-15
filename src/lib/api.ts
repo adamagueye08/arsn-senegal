@@ -169,6 +169,12 @@ export const api = {
   typesAutorisation: {
     lister: () => request<TypeAutorisation[]>("/types-autorisation"),
   },
+  statsPubliques: {
+    obtenir: () =>
+      request<{ autorisationsDelivrees: number; dossiersTraites: number; etablissementsControles: number }>(
+        "/stats-publiques"
+      ),
+  },
   demandes: {
     lister: () => request<Demande[]>("/demandes"),
     detail: (id: string) => request<DemandeDetail>(`/demandes/${id}`),

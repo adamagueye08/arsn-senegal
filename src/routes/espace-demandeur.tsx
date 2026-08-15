@@ -13,6 +13,7 @@ import {
   type DemandeDetail,
 } from "@/lib/api";
 import { DynamicRequestForm } from "@/components/forms/DynamicRequestForm";
+import { Skeleton, SkeletonRows, SkeletonPanel } from "@/components/site/Skeleton";
 
 export const Route = createFileRoute("/espace-demandeur")({
   head: () => ({
@@ -239,7 +240,9 @@ function Dashboard({ c, user }: { c: Dict; user: { nom: string; prenom: string }
       <div>
         <h3 className="text-sm font-mono uppercase tracking-[0.2em] mb-4">{c.myRequestsTitle}</h3>
         {loadingData ? (
-          <p className="text-sm text-muted-foreground">{c.loading}</p>
+          <div className="ring-1 ring-black/5 rounded-lg overflow-hidden bg-white">
+            <SkeletonRows rows={3} />
+          </div>
         ) : demandes.length === 0 ? (
           <p className="text-sm text-muted-foreground">{c.noRequests}</p>
         ) : (
@@ -487,7 +490,7 @@ function DemandeDetailPanel({
   }
 
   if (loading || !detail) {
-    return <div className="p-4 border-t border-border text-sm text-muted-foreground">Chargement…</div>;
+    return <SkeletonPanel />;
   }
 
   return (

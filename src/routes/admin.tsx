@@ -13,6 +13,7 @@ import {
   type DemandeDetail,
 } from "@/lib/api";
 import { FormDataReview } from "@/components/forms/FormDataReview";
+import { Skeleton, SkeletonRows, SkeletonPanel } from "@/components/site/Skeleton";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -198,7 +199,9 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Chargement…</p>
+          <div className="bg-white ring-1 ring-black/5 rounded-lg overflow-hidden">
+            <SkeletonRows rows={5} />
+          </div>
         ) : demandes.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aucune demande trouvée.</p>
         ) : (
@@ -392,7 +395,7 @@ function DemandeAdminPanel({
   }
 
   if (loading || !detail) {
-    return <div className="p-6 text-sm text-muted-foreground">Chargement du dossier…</div>;
+    return <SkeletonPanel />;
   }
 
   const estFinal = ["APPROUVEE", "REJETEE"].includes(statut);
@@ -774,7 +777,7 @@ function UsersPanel() {
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Chargement…</p>
+        <SkeletonRows rows={4} />
       ) : (
         <div className="bg-white ring-1 ring-black/5 shadow-sm rounded-lg divide-y divide-border">
           {users.map((u) => (
@@ -1021,7 +1024,7 @@ function TypesPanel() {
       )}
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Chargement…</p>
+        <SkeletonRows rows={4} />
       ) : (
         <div className="bg-white ring-1 ring-black/5 shadow-sm rounded-lg divide-y divide-border">
           {types.map((t: any) => (

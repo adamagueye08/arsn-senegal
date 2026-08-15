@@ -79,47 +79,50 @@ function Page() {
   return (
     <div className="min-h-[75vh] bg-gradient-to-b from-secondary/40 to-background flex items-center justify-center py-16 px-4">
       <div className="arsn-auth-perspective w-full max-w-3xl animate-reveal" style={{ perspective: "1600px" }}>
-        {/* Repli mobile : onglets + formulaire actif seul, pleine largeur */}
-        <div className="sm:hidden flex gap-2 mb-4 justify-center">
-          <button
-            onClick={() => setMode("login")}
-            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors duration-200 ${mode === "login" ? "bg-arsn-blue text-white" : "ring-1 ring-border"}`}
-          >
-            Se connecter
-          </button>
-          <button
-            onClick={() => setMode("register")}
-            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors duration-200 ${mode === "register" ? "bg-arsn-blue text-white" : "ring-1 ring-border"}`}
-          >
-            Créer un compte
-          </button>
-        </div>
-        <div className="sm:hidden p-6 bg-white ring-1 ring-black/5 shadow-sm rounded-lg">
-          {mode === "login" ? (
-            <LoginForm
-              email={loginEmail}
-              setEmail={setLoginEmail}
-              password={loginPassword}
-              setPassword={setLoginPassword}
-              busy={busy}
-              onSubmit={handleLogin}
-              interactive
-            />
-          ) : (
-            <RegisterForm
-              prenom={regPrenom}
-              setPrenom={setRegPrenom}
-              nom={regNom}
-              setNom={setRegNom}
-              email={regEmail}
-              setEmail={setRegEmail}
-              password={regPassword}
-              setPassword={setRegPassword}
-              busy={busy}
-              onSubmit={handleRegister}
-              interactive
-            />
-          )}
+        {/* Repli mobile : même effet de carte 3D, mais en flip plein écran (pas de côte à côte possible) */}
+        <div className="sm:hidden arsn-flip-outer" style={{ minHeight: 560 }}>
+          <div className={`arsn-flip-inner ${mode === "register" ? "flipped" : ""}`}>
+            <div className="arsn-flip-face p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center">
+              <LoginForm
+                email={loginEmail}
+                setEmail={setLoginEmail}
+                password={loginPassword}
+                setPassword={setLoginPassword}
+                busy={busy}
+                onSubmit={handleLogin}
+                interactive={mode === "login"}
+              />
+              <button
+                type="button"
+                onClick={() => switchTo("register")}
+                className="mt-5 text-xs font-semibold text-arsn-blue hover:underline text-center"
+              >
+                Pas encore de compte ? Créer un compte →
+              </button>
+            </div>
+            <div className="arsn-flip-face back p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center">
+              <RegisterForm
+                prenom={regPrenom}
+                setPrenom={setRegPrenom}
+                nom={regNom}
+                setNom={setRegNom}
+                email={regEmail}
+                setEmail={setRegEmail}
+                password={regPassword}
+                setPassword={setRegPassword}
+                busy={busy}
+                onSubmit={handleRegister}
+                interactive={mode === "register"}
+              />
+              <button
+                type="button"
+                onClick={() => switchTo("login")}
+                className="mt-5 text-xs font-semibold text-arsn-blue hover:underline text-center"
+              >
+                ← Déjà un compte ? Se connecter
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="hidden sm:block relative w-full aspect-[16/9] rounded-xl shadow-lg ring-1 ring-black/5 overflow-hidden bg-white">
