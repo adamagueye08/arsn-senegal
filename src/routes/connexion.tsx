@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { api, setSession } from "@/lib/api";
 
@@ -27,6 +27,16 @@ function Page() {
   const [mode, setMode] = useState<Mode>("login");
   const [turning, setTurning] = useState<"turning-left" | "turning-right" | "">("");
   const [busy, setBusy] = useState(false);
+  const [slowHint, setSlowHint] = useState(false);
+
+  useEffect(() => {
+    if (!busy) {
+      setSlowHint(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setSlowHint(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [busy]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -37,9 +47,14 @@ function Page() {
   const [regPassword, setRegPassword] = useState("");
 
   function switchTo(next: Mode) {
-    if (next === mode || turning) return;
+    if (next === mode) return;
     setTurning(next === "register" ? "turning-left" : "turning-right");
     setMode(next);
+    // Le déblocage ne peut pas dépendre de onAnimationEnd sur le panneau desktop :
+    // cet élément est en display:none sur mobile (hidden sm:block), et un élément
+    // non affiché ne joue jamais son animation CSS — l'événement ne se déclenche
+    // donc jamais, ce qui bloquait "turning" indéfiniment après le premier clic.
+    window.setTimeout(() => setTurning(""), 750);
   }
 
   async function handleLogin(e: React.FormEvent) {
@@ -95,6 +110,7 @@ function Page() {
               password={loginPassword}
               setPassword={setLoginPassword}
               busy={busy}
+              slowHint={slowHint}
               onSubmit={handleLogin}
               interactive={mode === "login"}
             />
@@ -123,6 +139,7 @@ function Page() {
               password={regPassword}
               setPassword={setRegPassword}
               busy={busy}
+              slowHint={slowHint}
               onSubmit={handleRegister}
               interactive={mode === "register"}
             />
@@ -163,6 +180,7 @@ function Page() {
                 password={loginPassword}
                 setPassword={setLoginPassword}
                 busy={busy}
+                slowHint={slowHint}
                 onSubmit={handleLogin}
                 interactive={mode === "login"}
               />
@@ -178,6 +196,7 @@ function Page() {
                 password={regPassword}
                 setPassword={setRegPassword}
                 busy={busy}
+                slowHint={slowHint}
                 onSubmit={handleRegister}
                 interactive={mode === "register"}
               />
@@ -234,6 +253,7 @@ function LoginForm({
   password,
   setPassword,
   busy,
+  slowHint,
   onSubmit,
   interactive,
 }: {
@@ -242,6 +262,7 @@ function LoginForm({
   password: string;
   setPassword: (v: string) => void;
   busy: boolean;
+  slowHint?: boolean;
   onSubmit: (e: React.FormEvent) => void;
   interactive: boolean;
 }) {
@@ -345,11 +366,26 @@ function LoginForm({
       <button
         type="submit"
         disabled={busy || !interactive}
-        className="w-full px-6 py-3 bg-arsn-blue text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-arsn-blue text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-70 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
       >
-        Se connecter
+        {busy && <Spinner />}
+        {busy ? "Connexion en cours…" : "Se connecter"}
       </button>
+      {busy && slowHint && (
+        <p className="text-xs text-center text-muted-foreground animate-reveal">
+          Le service met un peu de temps à démarrer, merci de patienter quelques secondes…
+        </p>
+      )}
     </form>
+  );
+}
+
+function Spinner() {
+  return (
+    <span
+      className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+      aria-hidden
+    />
   );
 }
 
@@ -363,6 +399,7 @@ function RegisterForm({
   password,
   setPassword,
   busy,
+  slowHint,
   onSubmit,
   interactive,
 }: {
@@ -375,6 +412,7 @@ function RegisterForm({
   password: string;
   setPassword: (v: string) => void;
   busy: boolean;
+  slowHint?: boolean;
   onSubmit: (e: React.FormEvent) => void;
   interactive: boolean;
 }) {
@@ -404,10 +442,16 @@ function RegisterForm({
       <button
         type="submit"
         disabled={busy || !interactive}
-        className="w-full px-6 py-3 bg-arsn-blue text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-arsn-blue text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-70 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
       >
-        Créer mon compte
+        {busy && <Spinner />}
+        {busy ? "Création en cours…" : "Créer mon compte"}
       </button>
+      {busy && slowHint && (
+        <p className="text-xs text-center text-muted-foreground animate-reveal">
+          Le service met un peu de temps à démarrer, merci de patienter quelques secondes…
+        </p>
+      )}
     </form>
   );
 }
