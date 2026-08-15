@@ -79,53 +79,77 @@ function Page() {
   return (
     <div className="min-h-[75vh] bg-gradient-to-b from-secondary/40 to-background flex items-center justify-center py-16 px-4">
       <div className="arsn-auth-perspective w-full max-w-3xl animate-reveal" style={{ perspective: "1600px" }}>
-        {/* Repli mobile : même effet de carte 3D, mais en flip plein écran (pas de côte à côte possible) */}
-        <div className="sm:hidden arsn-flip-outer" style={{ minHeight: 560 }}>
-          <div className={`arsn-flip-inner ${mode === "register" ? "flipped" : ""}`}>
-            <div
-              className={`arsn-flip-face p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center ${mode === "login" ? "" : "pointer-events-none"}`}
+        {/* Repli mobile : glissement + fondu simple (le flip 3D était peu fiable
+            sur Safari iOS réel — rendu et interception de clics imprévisibles) */}
+        <div className="sm:hidden relative overflow-hidden">
+          <div
+            className={`absolute inset-0 p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center transition-all duration-300 ease-out ${
+              mode === "login"
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-full opacity-0 pointer-events-none invisible"
+            }`}
+          >
+            <LoginForm
+              email={loginEmail}
+              setEmail={setLoginEmail}
+              password={loginPassword}
+              setPassword={setLoginPassword}
+              busy={busy}
+              onSubmit={handleLogin}
+              interactive={mode === "login"}
+            />
+            <button
+              type="button"
+              onClick={() => switchTo("register")}
+              className="mt-5 text-xs font-semibold text-arsn-blue hover:underline text-center"
             >
-              <LoginForm
-                email={loginEmail}
-                setEmail={setLoginEmail}
-                password={loginPassword}
-                setPassword={setLoginPassword}
-                busy={busy}
-                onSubmit={handleLogin}
-                interactive={mode === "login"}
-              />
-              <button
-                type="button"
-                onClick={() => switchTo("register")}
-                className="mt-5 text-xs font-semibold text-arsn-blue hover:underline text-center"
-              >
-                Pas encore de compte ? Créer un compte →
-              </button>
-            </div>
-            <div
-              className={`arsn-flip-face back p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center ${mode === "register" ? "" : "pointer-events-none"}`}
+              Pas encore de compte ? Créer un compte →
+            </button>
+          </div>
+          <div
+            className={`absolute inset-0 p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center transition-all duration-300 ease-out ${
+              mode === "register"
+                ? "translate-x-0 opacity-100"
+                : "translate-x-full opacity-0 pointer-events-none invisible"
+            }`}
+          >
+            <RegisterForm
+              prenom={regPrenom}
+              setPrenom={setRegPrenom}
+              nom={regNom}
+              setNom={setRegNom}
+              email={regEmail}
+              setEmail={setRegEmail}
+              password={regPassword}
+              setPassword={setRegPassword}
+              busy={busy}
+              onSubmit={handleRegister}
+              interactive={mode === "register"}
+            />
+            <button
+              type="button"
+              onClick={() => switchTo("login")}
+              className="mt-5 text-xs font-semibold text-arsn-blue hover:underline text-center"
             >
-              <RegisterForm
-                prenom={regPrenom}
-                setPrenom={setRegPrenom}
-                nom={regNom}
-                setNom={setRegNom}
-                email={regEmail}
-                setEmail={setRegEmail}
-                password={regPassword}
-                setPassword={setRegPassword}
-                busy={busy}
-                onSubmit={handleRegister}
-                interactive={mode === "register"}
-              />
-              <button
-                type="button"
-                onClick={() => switchTo("login")}
-                className="mt-5 text-xs font-semibold text-arsn-blue hover:underline text-center"
-              >
-                ← Déjà un compte ? Se connecter
-              </button>
-            </div>
+              ← Déjà un compte ? Se connecter
+            </button>
+          </div>
+          {/* Élément fantôme pour donner sa hauteur naturelle au conteneur (les
+              deux panneaux sont en position absolute) */}
+          <div className="invisible p-6">
+            <RegisterForm
+              prenom=""
+              setPrenom={() => {}}
+              nom=""
+              setNom={() => {}}
+              email=""
+              setEmail={() => {}}
+              password=""
+              setPassword={() => {}}
+              busy={false}
+              onSubmit={(e) => e.preventDefault()}
+              interactive={false}
+            />
           </div>
         </div>
 
