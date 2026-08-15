@@ -349,6 +349,7 @@ function DemandeDetailPanel({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [draftNotes, setDraftNotes] = useState("");
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   async function load(silent = false) {
     if (!silent) setLoading(true);
@@ -440,6 +441,28 @@ function DemandeDetailPanel({
     } finally {
       setBusy(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleDownloadPiece(pieceId: string, nomFichier: string) {
+    setDownloadingId(pieceId);
+    try {
+      await api.demandes.telechargerPiece(demandeId, pieceId, nomFichier);
+    } catch (err: any) {
+      toast.error("Téléchargement impossible", { description: String(err.message || err) });
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
+  async function handleDownloadAttestation() {
+    setDownloadingId("attestation");
+    try {
+      await api.demandes.telechargerAttestation(demandeId, detail?.autorisation?.pdfNomFichier || undefined);
+    } catch (err: any) {
+      toast.error("Téléchargement impossible", { description: String(err.message || err) });
+    } finally {
+      setDownloadingId(null);
     }
   }
 
@@ -565,12 +588,11 @@ function DemandeDetailPanel({
             <div className="flex items-center justify-between gap-3 p-3 bg-white rounded-lg ring-1 ring-black/5">
               <span className="text-sm">📄 {detail.autorisation.pdfNomFichier || "Attestation d'autorisation"}</span>
               <button
-                onClick={() =>
-                  api.demandes.telechargerAttestation(demandeId, detail.autorisation?.pdfNomFichier || undefined)
-                }
-                className="shrink-0 px-3 py-1.5 bg-arsn-green text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all duration-200"
+                disabled={downloadingId === "attestation"}
+                onClick={() => handleDownloadAttestation()}
+                className="shrink-0 px-3 py-1.5 bg-arsn-green text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all duration-200 disabled:opacity-50"
               >
-                Télécharger l'attestation
+                {downloadingId === "attestation" ? "Téléchargement…" : "Télécharger l'attestation"}
               </button>
             </div>
           ) : (
@@ -591,10 +613,11 @@ function DemandeDetailPanel({
               <li key={p.id} className="flex items-center justify-between gap-2 text-xs">
                 <span className="text-muted-foreground truncate min-w-0">📎 {p.nomFichier}</span>
                 <button
-                  onClick={() => api.demandes.telechargerPiece(demandeId, p.id, p.nomFichier)}
-                  className="shrink-0 text-arsn-blue font-semibold hover:underline"
+                  disabled={downloadingId === p.id}
+                  onClick={() => handleDownloadPiece(p.id, p.nomFichier)}
+                  className="shrink-0 text-arsn-blue font-semibold hover:underline disabled:opacity-50"
                 >
-                  Télécharger
+                  {downloadingId === p.id ? "Téléchargement…" : "Télécharger"}
                 </button>
               </li>
             ))}

@@ -275,6 +275,7 @@ function DemandeAdminPanel({
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [modeComplement, setModeComplement] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [piecesManquantes, setPiecesManquantes] = useState<string[]>([]);
   const [noteComplement, setNoteComplement] = useState("");
   const [attestationFile, setAttestationFile] = useState<File | null>(null);
@@ -372,10 +373,24 @@ function DemandeAdminPanel({
   }
 
   async function handleTelechargerPiece(pieceId: string, nomFichier: string) {
+    setDownloadingId(pieceId);
     try {
       await api.demandes.telechargerPiece(demandeId, pieceId, nomFichier);
     } catch (err: any) {
       toast.error("Téléchargement impossible", { description: String(err.message || err) });
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
+  async function handleTelechargerAttestation() {
+    setDownloadingId("attestation");
+    try {
+      await api.demandes.telechargerAttestation(demandeId, detail?.autorisation?.pdfNomFichier || undefined);
+    } catch (err: any) {
+      toast.error("Téléchargement impossible", { description: String(err.message || err) });
+    } finally {
+      setDownloadingId(null);
     }
   }
 
@@ -435,10 +450,11 @@ function DemandeAdminPanel({
               <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="truncate min-w-0">{p.nomFichier}</span>
                 <button
+                  disabled={downloadingId === p.id}
                   onClick={() => handleTelechargerPiece(p.id, p.nomFichier)}
-                  className="shrink-0 text-xs font-semibold text-arsn-blue hover:underline"
+                  className="shrink-0 text-xs font-semibold text-arsn-blue hover:underline disabled:opacity-50"
                 >
-                  Télécharger
+                  {downloadingId === p.id ? "Téléchargement…" : "Télécharger"}
                 </button>
               </li>
             ))}
@@ -457,10 +473,11 @@ function DemandeAdminPanel({
                 {new Date(detail.autorisation.dateSignature).toLocaleDateString("fr-FR")}
               </span>
               <button
-                onClick={() => api.demandes.telechargerAttestation(demandeId, detail.autorisation?.pdfNomFichier || undefined)}
-                className="shrink-0 text-xs font-semibold text-arsn-blue hover:underline"
+                disabled={downloadingId === "attestation"}
+                onClick={handleTelechargerAttestation}
+                className="shrink-0 text-xs font-semibold text-arsn-blue hover:underline disabled:opacity-50"
               >
-                Télécharger
+                {downloadingId === "attestation" ? "Téléchargement…" : "Télécharger"}
               </button>
             </div>
           ) : (
