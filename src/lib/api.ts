@@ -28,16 +28,36 @@ export function clearSession() {
   localStorage.removeItem(USER_KEY);
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+function attendre(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function request<T>(path: string, options: RequestInit = {}, tentative = 0): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+  } catch (err) {
+    // Échec réseau pur (la requête n'a même pas atteint le serveur) :
+    // le cas le plus fréquent est un serveur Render qui se réveille
+    // après une période d'inactivité. On retente automatiquement
+    // avant d'abandonner, plutôt que de remonter "Failed to fetch"
+    // tel quel à l'utilisateur.
+    if (tentative < 2) {
+      await attendre(1500 * (tentative + 1));
+      return request<T>(path, options, tentative + 1);
+    }
+    throw new Error(
+      "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez dans quelques secondes."
+    );
+  }
 
   if (!res.ok) {
     const erreur = await res.json().catch(() => ({ erreur: res.statusText }));

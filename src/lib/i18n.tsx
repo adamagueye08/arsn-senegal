@@ -23,7 +23,7 @@ export const translations: Translations = {
     "nav.information": "Information",
     "nav.videotheque": "Vidéothèque",
     "nav.contact": "Contact",
-    "nav.account": "Espace demandeur",
+    "nav.account": "Autorisations",
     "nav.services": "Services en ligne",
     "nav.publications": "Publications",
     "nav.articles": "Articles & actualités",
