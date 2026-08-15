@@ -82,7 +82,9 @@ function Page() {
         {/* Repli mobile : même effet de carte 3D, mais en flip plein écran (pas de côte à côte possible) */}
         <div className="sm:hidden arsn-flip-outer" style={{ minHeight: 560 }}>
           <div className={`arsn-flip-inner ${mode === "register" ? "flipped" : ""}`}>
-            <div className="arsn-flip-face p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center">
+            <div
+              className={`arsn-flip-face p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center ${mode === "login" ? "" : "pointer-events-none"}`}
+            >
               <LoginForm
                 email={loginEmail}
                 setEmail={setLoginEmail}
@@ -100,7 +102,9 @@ function Page() {
                 Pas encore de compte ? Créer un compte →
               </button>
             </div>
-            <div className="arsn-flip-face back p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center">
+            <div
+              className={`arsn-flip-face back p-6 bg-white ring-1 ring-black/5 shadow-lg rounded-xl flex flex-col justify-center ${mode === "register" ? "" : "pointer-events-none"}`}
+            >
               <RegisterForm
                 prenom={regPrenom}
                 setPrenom={setRegPrenom}

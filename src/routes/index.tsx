@@ -244,55 +244,50 @@ function Home() {
   );
 }
 
-function PublicStats() {
-  const { t, lang } = useLang();
-  const [stats, setStats] = useState<{
-    autorisationsDelivrees: number;
-    dossiersTraites: number;
-    etablissementsControles: number;
-  } | null>(null);
-
+function useCountUp(target: number, durationMs = 1500) {
+  const [value, setValue] = useState(0);
   useEffect(() => {
-    api.statsPubliques
-      .obtenir()
-      .then(setStats)
-      .catch(() => {
-        // Silencieux : la page d'accueil reste utilisable sans ces chiffres.
-      });
-  }, []);
+    let raf: number;
+    const start = performance.now();
+    function tick(now: number) {
+      const progress = Math.min((now - start) / durationMs, 1);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(eased * target));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, durationMs]);
+  return value;
+}
 
+function PublicStats() {
+  const { lang } = useLang();
+
+  // Chiffres approximatifs — pas encore de statistiques officielles publiables.
   const items = [
-    {
-      value: stats?.autorisationsDelivrees,
-      label: lang === "en" ? "Licences issued" : "Autorisations délivrées",
-    },
-    {
-      value: stats?.dossiersTraites,
-      label: lang === "en" ? "Applications processed" : "Dossiers traités",
-    },
-    {
-      value: stats?.etablissementsControles,
-      label: lang === "en" ? "Facilities inspected" : "Établissements contrôlés",
-    },
+    { target: 50, label: lang === "en" ? "Licences issued" : "Autorisations délivrées" },
+    { target: 100, label: lang === "en" ? "Applications processed" : "Dossiers traités" },
+    { target: 30, label: lang === "en" ? "Facilities inspected" : "Établissements contrôlés" },
   ];
 
   return (
     <section className="grid grid-cols-3 gap-4 md:gap-8 mb-16 md:mb-20 animate-reveal">
-      {items.map((item, i) => (
-        <div key={item.label} className="text-center md:text-left border-t-2 border-foreground pt-4">
-          <div className="text-4xl md:text-6xl font-serif tabular-nums">
-            {item.value === undefined ? (
-              <span className="inline-block w-16 md:w-24 h-10 md:h-14 arsn-skeleton rounded align-middle" />
-            ) : (
-              item.value
-            )}
-          </div>
-          <p className="text-xs md:text-sm text-muted-foreground mt-2 uppercase tracking-wide font-mono">
-            {item.label}
-          </p>
-        </div>
+      {items.map((item) => (
+        <StatCounter key={item.label} target={item.target} label={item.label} />
       ))}
     </section>
+  );
+}
+
+function StatCounter({ target, label }: { target: number; label: string }) {
+  const value = useCountUp(target);
+  return (
+    <div className="text-center md:text-left border-t-2 border-foreground pt-4">
+      <div className="text-4xl md:text-6xl font-serif tabular-nums">{value}+</div>
+      <p className="text-xs md:text-sm text-muted-foreground mt-2 uppercase tracking-wide font-mono">{label}</p>
+    </div>
   );
 }
 
