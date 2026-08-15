@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -15,6 +15,7 @@ import { LanguageProvider } from "@/lib/i18n";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { Toaster } from "@/components/ui/sonner";
+import { reveillerServeur, onRetryStateChange } from "@/lib/api";
 
 function NotFoundComponent() {
   return (
@@ -134,12 +135,23 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [retrying, setRetrying] = useState(false);
+
+  useEffect(() => {
+    reveillerServeur();
+    return onRetryStateChange(setRetrying);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <div className="relative min-h-screen flex flex-col bg-transparent text-foreground selection:bg-arsn-yellow/30">
           <div className="arsn-animated-bg" aria-hidden="true"><span /></div>
+          {retrying && (
+            <div className="fixed top-0 inset-x-0 z-[100] bg-arsn-yellow text-foreground text-xs font-semibold text-center py-2 animate-reveal">
+              Le service met un peu de temps à répondre, nouvelle tentative en cours…
+            </div>
+          )}
           <SiteHeader />
           <main className="flex-1">
             <Outlet />

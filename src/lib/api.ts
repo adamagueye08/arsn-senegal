@@ -32,6 +32,20 @@ function attendre(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Abonnés notifiés quand une requête entre en re-tentative (pour afficher un indice UI). */
+const retryListeners = new Set<(enCours: boolean) => void>();
+export function onRetryStateChange(listener: (enCours: boolean) => void) {
+  retryListeners.add(listener);
+  return () => {
+    retryListeners.delete(listener);
+  };
+}
+function notifierRetry(enCours: boolean) {
+  retryListeners.forEach((l) => l(enCours));
+}
+
+const DELAIS_RETRY_MS = [1500, 3000, 5000, 8000]; // ~17.5s de tentatives au total
+
 async function request<T>(path: string, options: RequestInit = {}, tentative = 0): Promise<T> {
   const token = getToken();
   let res: Response;
@@ -47,17 +61,20 @@ async function request<T>(path: string, options: RequestInit = {}, tentative = 0
   } catch (err) {
     // Échec réseau pur (la requête n'a même pas atteint le serveur) :
     // le cas le plus fréquent est un serveur Render qui se réveille
-    // après une période d'inactivité. On retente automatiquement
-    // avant d'abandonner, plutôt que de remonter "Failed to fetch"
-    // tel quel à l'utilisateur.
-    if (tentative < 2) {
-      await attendre(1500 * (tentative + 1));
+    // après une période d'inactivité, ou un aléa de connexion mobile.
+    // On retente automatiquement avant d'abandonner, plutôt que de
+    // remonter "Failed to fetch" tel quel à l'utilisateur.
+    if (tentative < DELAIS_RETRY_MS.length) {
+      notifierRetry(true);
+      await attendre(DELAIS_RETRY_MS[tentative]);
       return request<T>(path, options, tentative + 1);
     }
+    notifierRetry(false);
     throw new Error(
-      "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez dans quelques secondes."
+      "Impossible de joindre le serveur après plusieurs tentatives. Vérifiez votre connexion et réessayez."
     );
   }
+  if (tentative > 0) notifierRetry(false);
 
   if (!res.ok) {
     const erreur = await res.json().catch(() => ({ erreur: res.statusText }));
@@ -67,6 +84,11 @@ async function request<T>(path: string, options: RequestInit = {}, tentative = 0
   }
   if (res.status === 204) return undefined as T;
   return res.json();
+}
+
+/** Ping léger pour réveiller le serveur au plus tôt (appelé au montage de l'app). */
+export function reveillerServeur() {
+  fetch(`${API_URL}/health`).catch(() => {});
 }
 
 async function downloadFile(path: string, filenameFallback: string) {
