@@ -5,10 +5,15 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import heroLabFull from "@/assets/hero-lab-full.jpg";
+import sectionReglementation from "@/assets/section-reglementation.jpg";
+import sectionInspection from "@/assets/section-inspection.jpg";
+import sectionDosimetrie from "@/assets/section-dosimetrie.jpg";
+import sectionVideotheque from "@/assets/section-videotheque.jpg";
 import heroLab from "@/assets/hero-lab.jpg";
 import newsConference from "@/assets/news-conference.jpg";
 import newsVisit from "@/assets/news-visit.jpg";
-import newsRadiology from "@/assets/news-radiology.jpg";import { NewsSlider } from "@/components/site/NewsSlider";
+import newsRadiology from "@/assets/news-radiology.jpg";
+import { NewsSlider } from "@/components/site/NewsSlider";
 import { DOCS, formatSize, type DocMeta } from "@/lib/documents";
 
 
@@ -34,10 +39,10 @@ export const Route = createFileRoute("/")({
 });
 
 const TAXONOMY = [
-  { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc", img: newsConference },
-  { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc", img: newsVisit },
-  { n: "03", to: "/dosimetrie", key: "nav.dosimetry", descKey: "tax.dosimetry.desc", img: newsRadiology },
-  { n: "04", to: "/videotheque", key: "nav.videotheque", descKey: "tax.videotheque.desc", img: heroLabFull },
+  { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc", img: sectionReglementation },
+  { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc", img: sectionInspection },
+  { n: "03", to: "/dosimetrie", key: "nav.dosimetry", descKey: "tax.dosimetry.desc", img: sectionDosimetrie },
+  { n: "04", to: "/videotheque", key: "nav.videotheque", descKey: "tax.videotheque.desc", img: sectionVideotheque },
 ] as const;
 
 function Home() {
