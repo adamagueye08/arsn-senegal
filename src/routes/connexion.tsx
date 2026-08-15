@@ -217,6 +217,74 @@ function LoginForm({
   onSubmit: (e: React.FormEvent) => void;
   interactive: boolean;
 }) {
+  const [forgot, setForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
+  async function handleForgotSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setForgotBusy(true);
+    try {
+      await api.auth.motDePasseOublie(forgotEmail);
+      setForgotSent(true);
+    } catch (err: any) {
+      toast.error("Erreur", { description: String(err.message || err) });
+    } finally {
+      setForgotBusy(false);
+    }
+  }
+
+  if (forgot) {
+    return (
+      <div
+        className={`space-y-4 transition-opacity duration-300 ${interactive ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        aria-hidden={!interactive}
+      >
+        <div>
+          <h1 className="text-2xl font-serif mb-1">Mot de passe oublié</h1>
+          <p className="text-sm text-muted-foreground">
+            Indiquez votre e-mail, nous vous envoyons un lien de réinitialisation.
+          </p>
+        </div>
+        {forgotSent ? (
+          <p className="text-sm p-3 bg-arsn-green/10 ring-1 ring-arsn-green/30 rounded-lg">
+            Si un compte existe avec cet e-mail, un lien de réinitialisation vient d'être envoyé. Vérifiez votre
+            boîte de réception.
+          </p>
+        ) : (
+          <form className="space-y-4" onSubmit={handleForgotSubmit}>
+            <TextField
+              label="E-mail"
+              type="email"
+              value={forgotEmail}
+              onChange={setForgotEmail}
+              required
+              tabIndex={interactive ? 0 : -1}
+            />
+            <button
+              type="submit"
+              disabled={forgotBusy || !interactive}
+              className="w-full px-6 py-3 bg-arsn-blue text-white text-sm font-semibold hover:opacity-90 rounded-lg disabled:opacity-50 transition-all duration-200"
+            >
+              Envoyer le lien
+            </button>
+          </form>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            setForgot(false);
+            setForgotSent(false);
+          }}
+          className="text-xs font-semibold text-arsn-blue hover:underline"
+        >
+          ← Retour à la connexion
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form
       className={`space-y-4 transition-opacity duration-300 ${interactive ? "opacity-100" : "opacity-0 pointer-events-none"}`}
@@ -236,6 +304,16 @@ function LoginForm({
         required
         tabIndex={interactive ? 0 : -1}
       />
+      <div className="text-right">
+        <button
+          type="button"
+          onClick={() => setForgot(true)}
+          tabIndex={interactive ? 0 : -1}
+          className="text-xs font-semibold text-arsn-blue hover:underline"
+        >
+          Mot de passe oublié ?
+        </button>
+      </div>
       <button
         type="submit"
         disabled={busy || !interactive}

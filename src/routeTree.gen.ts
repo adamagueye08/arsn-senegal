@@ -20,6 +20,7 @@ import { Route as InformationRouteImport } from './routes/information'
 import { Route as InspectionRouteImport } from './routes/inspection'
 import { Route as LArsnRouteImport } from './routes/l-arsn'
 import { Route as ReglementationRouteImport } from './routes/reglementation'
+import { Route as ReinitialiserMotDePasseRouteImport } from './routes/reinitialiser-mot-de-passe'
 import { Route as VideothequeRouteImport } from './routes/videotheque'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,11 @@ const ReglementationRoute = ReglementationRouteImport.update({
   path: '/reglementation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReinitialiserMotDePasseRoute = ReinitialiserMotDePasseRouteImport.update({
+  id: '/reinitialiser-mot-de-passe',
+  path: '/reinitialiser-mot-de-passe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VideothequeRoute = VideothequeRouteImport.update({
   id: '/videotheque',
   path: '/videotheque',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/inspection': typeof InspectionRoute
   '/l-arsn': typeof LArsnRoute
   '/reglementation': typeof ReglementationRoute
+  '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/videotheque': typeof VideothequeRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/inspection': typeof InspectionRoute
   '/l-arsn': typeof LArsnRoute
   '/reglementation': typeof ReglementationRoute
+  '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/videotheque': typeof VideothequeRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/inspection': typeof InspectionRoute
   '/l-arsn': typeof LArsnRoute
   '/reglementation': typeof ReglementationRoute
+  '/reinitialiser-mot-de-passe': typeof ReinitialiserMotDePasseRoute
   '/videotheque': typeof VideothequeRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/inspection'
     | '/l-arsn'
     | '/reglementation'
+    | '/reinitialiser-mot-de-passe'
     | '/videotheque'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/inspection'
     | '/l-arsn'
     | '/reglementation'
+    | '/reinitialiser-mot-de-passe'
     | '/videotheque'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/inspection'
     | '/l-arsn'
     | '/reglementation'
+    | '/reinitialiser-mot-de-passe'
     | '/videotheque'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   InspectionRoute: typeof InspectionRoute
   LArsnRoute: typeof LArsnRoute
   ReglementationRoute: typeof ReglementationRoute
+  ReinitialiserMotDePasseRoute: typeof ReinitialiserMotDePasseRoute
   VideothequeRoute: typeof VideothequeRoute
 }
 
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReglementationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reinitialiser-mot-de-passe': {
+      id: '/reinitialiser-mot-de-passe'
+      path: '/reinitialiser-mot-de-passe'
+      fullPath: '/reinitialiser-mot-de-passe'
+      preLoaderRoute: typeof ReinitialiserMotDePasseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/videotheque': {
       id: '/videotheque'
       path: '/videotheque'
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   InspectionRoute: InspectionRoute,
   LArsnRoute: LArsnRoute,
   ReglementationRoute: ReglementationRoute,
+  ReinitialiserMotDePasseRoute: ReinitialiserMotDePasseRoute,
   VideothequeRoute: VideothequeRoute,
 }
 export const routeTree = rootRouteImport

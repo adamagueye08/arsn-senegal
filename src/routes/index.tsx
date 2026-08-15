@@ -8,8 +8,7 @@ import heroLabFull from "@/assets/hero-lab-full.jpg";
 import heroLab from "@/assets/hero-lab.jpg";
 import newsConference from "@/assets/news-conference.jpg";
 import newsVisit from "@/assets/news-visit.jpg";
-import newsRadiology from "@/assets/news-radiology.jpg";
-import { NewsSlider } from "@/components/site/NewsSlider";
+import newsRadiology from "@/assets/news-radiology.jpg";import { NewsSlider } from "@/components/site/NewsSlider";
 import { DOCS, formatSize, type DocMeta } from "@/lib/documents";
 
 
@@ -35,10 +34,10 @@ export const Route = createFileRoute("/")({
 });
 
 const TAXONOMY = [
-  { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc" },
-  { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc" },
-  { n: "03", to: "/dosimetrie", key: "nav.dosimetry", descKey: "tax.dosimetry.desc" },
-  { n: "04", to: "/videotheque", key: "nav.videotheque", descKey: "tax.videotheque.desc" },
+  { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc", img: newsConference },
+  { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc", img: newsVisit },
+  { n: "03", to: "/dosimetrie", key: "nav.dosimetry", descKey: "tax.dosimetry.desc", img: newsRadiology },
+  { n: "04", to: "/videotheque", key: "nav.videotheque", descKey: "tax.videotheque.desc", img: heroLabFull },
 ] as const;
 
 function Home() {
@@ -129,14 +128,23 @@ function Home() {
             <Link
               key={item.n}
               to={item.to}
-              className="p-8 bg-white ring-1 ring-black/5 hover:ring-arsn-green/40 transition-all group block"
+              className="relative overflow-hidden rounded-lg ring-1 ring-black/5 group block h-72"
             >
-              <span className="block font-mono text-[10px] text-muted-foreground mb-6">
-                {item.n} // {t("home.taxonomy.section")}
-              </span>
-              <h3 className="text-lg font-bold mb-2">{t(item.key)}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
-              <ArrowRight className="w-4 h-4 mt-6 text-muted-foreground group-hover:text-arsn-green group-hover:translate-x-1 transition-all" />
+              <img
+                src={item.img}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 transition-colors duration-300 group-hover:from-black/95" />
+              <div className="relative z-10 h-full p-8 flex flex-col justify-end text-white">
+                <span className="block font-mono text-[10px] text-white/70 mb-3">
+                  {item.n} // {t("home.taxonomy.section")}
+                </span>
+                <h3 className="text-lg font-bold mb-2">{t(item.key)}</h3>
+                <p className="text-sm text-white/80 leading-relaxed">{t(item.descKey)}</p>
+                <ArrowRight className="w-4 h-4 mt-4 text-arsn-green group-hover:translate-x-1 transition-transform" />
+              </div>
             </Link>
           ))}
         </section>

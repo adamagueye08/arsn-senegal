@@ -165,6 +165,13 @@ export const api = {
         body: JSON.stringify(data),
       }),
     me: () => request("/auth/me"),
+    motDePasseOublie: (email: string) =>
+      request<{ message: string }>("/auth/mot-de-passe-oublie", { method: "POST", body: JSON.stringify({ email }) }),
+    reinitialiserMotDePasse: (token: string, nouveauMotDePasse: string) =>
+      request<{ message: string }>("/auth/reinitialiser-mot-de-passe", {
+        method: "POST",
+        body: JSON.stringify({ token, nouveauMotDePasse }),
+      }),
   },
   typesAutorisation: {
     lister: () => request<TypeAutorisation[]>("/types-autorisation"),
