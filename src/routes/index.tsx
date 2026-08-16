@@ -141,13 +141,16 @@ function Home() {
                 aria-hidden
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 transition-colors duration-300 group-hover:from-black/95" />
-              <div className="relative z-10 h-full p-8 flex flex-col justify-end text-white">
-                <span className="block font-mono text-[10px] text-white/70 mb-3">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/25 transition-colors duration-300 group-hover:from-black" />
+              <div
+                className="relative z-10 h-full p-8 flex flex-col justify-end text-white"
+                style={{ textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}
+              >
+                <span className="block font-mono text-[10px] text-white/90 mb-3">
                   {item.n} // {t("home.taxonomy.section")}
                 </span>
                 <h3 className="text-lg font-bold mb-2">{t(item.key)}</h3>
-                <p className="text-sm text-white/80 leading-relaxed">{t(item.descKey)}</p>
+                <p className="text-sm text-white/95 leading-relaxed">{t(item.descKey)}</p>
                 <ArrowRight className="w-4 h-4 mt-4 text-arsn-green group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>

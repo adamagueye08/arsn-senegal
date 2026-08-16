@@ -353,5 +353,17 @@ export const api = {
       modifier: (id: string, data: Partial<{ nom: string; description: string; dureeValiditeMois: number; frais: number; actif: boolean }>) =>
         request<TypeAutorisation>(`/admin/types-autorisation/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     },
+    messagesContact: {
+      lister: () =>
+        request<
+          { id: string; nom: string; email: string; telephone?: string | null; sujet?: string | null; message: string; lu: boolean; createdAt: string }[]
+        >("/admin/messages-contact"),
+      marquerLu: (id: string) => request(`/admin/messages-contact/${id}/lu`, { method: "PATCH" }),
+    },
   },
+};
+
+export const contact = {
+  envoyer: (data: { nom: string; email: string; telephone?: string; sujet?: string; message: string }) =>
+    request<{ id: string }>("/contact", { method: "POST", body: JSON.stringify(data) }),
 };

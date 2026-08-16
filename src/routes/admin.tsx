@@ -91,7 +91,7 @@ function Page() {
 }
 
 function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => void }) {
-  const [tab, setTab] = useState<"demandes" | "utilisateurs" | "types" | "rapports">("demandes");
+  const [tab, setTab] = useState<"demandes" | "utilisateurs" | "types" | "rapports" | "messages">("demandes");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [demandes, setDemandes] = useState<DemandeAdmin[]>([]);
   const [q, setQ] = useState("");
@@ -175,9 +175,18 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
         >
           Rapports
         </button>
+        <button
+          onClick={() => setTab("messages")}
+          className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
+            tab === "messages" ? "border-arsn-green text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Messages
+        </button>
       </div>
 
       {tab === "rapports" && <RapportsPanel />}
+      {tab === "messages" && <MessagesContactPanel />}
 
       {tab === "demandes" && (
       <div className="space-y-8 animate-reveal">
@@ -655,6 +664,109 @@ function DemandeAdminPanel({
 }
 
 const COULEURS_GRAPHIQUE = ["#1D3557", "#2A9D8F", "#E9C46A", "#E76F51", "#457B9D", "#A8DADC"];
+
+function MessagesContactPanel() {
+  const [messages, setMessages] = useState<
+    { id: string; nom: string; email: string; telephone?: string | null; sujet?: string | null; message: string; lu: boolean; createdAt: string }[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const data = await api.admin.messagesContact.lister();
+      setMessages(data);
+    } catch (err: any) {
+      toast.error("Erreur", { description: String(err.message || err) });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function handleOpen(id: string, lu: boolean) {
+    setExpandedId(expandedId === id ? null : id);
+    if (!lu) {
+      try {
+        await api.admin.messagesContact.marquerLu(id);
+        setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, lu: true } : m)));
+      } catch {
+        // silencieux : le marquage lu n'est pas critique
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-white ring-1 ring-black/5 rounded-lg overflow-hidden">
+        <SkeletonRows rows={4} />
+      </div>
+    );
+  }
+
+  if (messages.length === 0) {
+    return (
+      <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg text-sm text-muted-foreground text-center animate-reveal">
+        Aucun message reçu pour l'instant.
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white ring-1 ring-black/5 rounded-lg divide-y divide-border animate-reveal">
+      {messages.map((m) => {
+        const expanded = expandedId === m.id;
+        return (
+          <div key={m.id}>
+            <button
+              onClick={() => handleOpen(m.id, m.lu)}
+              className="w-full flex flex-wrap items-center gap-2 justify-between p-4 text-sm text-left hover:bg-secondary/40 transition-colors duration-200"
+            >
+              <div className="flex items-center gap-2 min-w-[160px]">
+                {!m.lu && <span className="w-2 h-2 rounded-full bg-arsn-red shrink-0" aria-label="Non lu" />}
+                <span className={m.lu ? "font-medium" : "font-bold"}>{m.nom}</span>
+              </div>
+              <span className="text-muted-foreground truncate min-w-0 flex-1">{m.sujet || "(sans sujet)"}</span>
+              <span className="text-xs text-muted-foreground shrink-0">
+                {new Date(m.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+              </span>
+              <span className="text-xs shrink-0">{expanded ? "▲" : "▼"}</span>
+            </button>
+            {expanded && (
+              <div className="p-4 pt-0 space-y-3 text-sm">
+                <div className="grid sm:grid-cols-2 gap-3 p-3 bg-secondary/30 rounded-lg">
+                  <div>
+                    <p className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">E-mail</p>
+                    <a href={`mailto:${m.email}`} className="text-arsn-blue hover:underline">
+                      {m.email}
+                    </a>
+                  </div>
+                  {m.telephone && (
+                    <div>
+                      <p className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">Téléphone</p>
+                      <p>{m.telephone}</p>
+                    </div>
+                  )}
+                </div>
+                <p className="whitespace-pre-line leading-relaxed">{m.message}</p>
+                <a
+                  href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.sujet || "Votre message à l'ARSN"}`)}`}
+                  className="inline-block px-4 py-2 bg-arsn-blue text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all duration-200"
+                >
+                  Répondre par e-mail
+                </a>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function RapportsPanel() {
   const [types, setTypes] = useState<TypeAutorisation[]>([]);

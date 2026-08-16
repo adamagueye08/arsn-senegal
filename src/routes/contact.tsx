@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { PageHero } from "@/components/site/PageHero";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { contact } from "@/lib/api";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -59,12 +61,42 @@ const EN: typeof FR = {
 function Page() {
   const { lang } = useLang();
   const c = lang === "fr" ? FR : EN;
+  const [busy, setBusy] = useState(false);
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [sujet, setSujet] = useState("");
+  const [message, setMessage] = useState("");
   const CARDS = [
     { icon: MapPin, ...c.address },
     { icon: Phone, ...c.phone },
     { icon: Mail, ...c.email },
     { icon: Clock, ...c.hours },
   ];
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await contact.envoyer({ nom, email, telephone: telephone || undefined, sujet: sujet || undefined, message });
+      toast.success(lang === "en" ? "Message sent" : "Message envoyé", {
+        description:
+          lang === "en"
+            ? "Thank you. The ARSN team will get back to you shortly."
+            : "Merci. L'équipe de l'ARSN vous répondra dans les meilleurs délais.",
+      });
+      setNom("");
+      setEmail("");
+      setTelephone("");
+      setSujet("");
+      setMessage("");
+    } catch (err: any) {
+      toast.error(lang === "en" ? "Sending failed" : "Envoi impossible", { description: String(err.message || err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <PageHero eyebrow={c.hero} title={c.title} subtitle={c.subtitle} />
@@ -95,32 +127,16 @@ function Page() {
           </div>
         </div>
 
-        <form
-          className="lg:col-span-3 p-8 bg-white ring-1 ring-black/5 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const form = e.currentTarget;
-            toast.success(
-              lang === "en" ? "Message sent" : "Message envoyé",
-              {
-                description:
-                  lang === "en"
-                    ? "Thank you. The ARSN team will get back to you shortly."
-                    : "Merci. L'équipe de l'ARSN vous répondra dans les meilleurs délais.",
-              }
-            );
-            form.reset();
-          }}
-        >
+        <form className="lg:col-span-3 p-8 bg-white ring-1 ring-black/5 space-y-4" onSubmit={handleSubmit}>
           <div>
             <h2 className="text-2xl font-serif font-bold mb-2">{c.formTitle}</h2>
             <p className="text-sm text-muted-foreground">{c.formIntro}</p>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={c.fields.name} type="text" />
-            <Field label={c.fields.email} type="email" />
-            <Field label={c.fields.phone} type="tel" />
-            <Field label={c.fields.subject} type="text" />
+            <Field label={c.fields.name} type="text" value={nom} onChange={setNom} required />
+            <Field label={c.fields.email} type="email" value={email} onChange={setEmail} required />
+            <Field label={c.fields.phone} type="tel" value={telephone} onChange={setTelephone} />
+            <Field label={c.fields.subject} type="text" value={sujet} onChange={setSujet} />
           </div>
           <div>
             <label className="block text-xs font-mono uppercase tracking-[0.2em] mb-2">
@@ -129,14 +145,17 @@ function Page() {
             <textarea
               rows={5}
               required
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               className="w-full border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
             />
           </div>
           <button
             type="submit"
-            className="px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-sm"
+            disabled={busy}
+            className="px-6 py-3 bg-foreground text-white text-sm font-semibold hover:bg-foreground/90 rounded-sm disabled:opacity-50"
           >
-            {c.send}
+            {busy ? "…" : c.send}
           </button>
         </form>
       </div>
@@ -144,12 +163,27 @@ function Page() {
   );
 }
 
-function Field({ label, type }: { label: string; type: string }) {
+function Field({
+  label,
+  type,
+  value,
+  onChange,
+  required,
+}: {
+  label: string;
+  type: string;
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+}) {
   return (
     <div>
       <label className="block text-xs font-mono uppercase tracking-[0.2em] mb-2">{label}</label>
       <input
         type={type}
+        required={required}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         className="w-full border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-arsn-green/40"
       />
     </div>
