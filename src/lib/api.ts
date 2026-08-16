@@ -62,16 +62,20 @@ async function request<T>(path: string, options: RequestInit = {}, tentative = 0
     // Échec réseau pur (la requête n'a même pas atteint le serveur) :
     // le cas le plus fréquent est un serveur Render qui se réveille
     // après une période d'inactivité, ou un aléa de connexion mobile.
-    // On retente automatiquement avant d'abandonner, plutôt que de
-    // remonter "Failed to fetch" tel quel à l'utilisateur.
-    if (tentative < DELAIS_RETRY_MS.length) {
+    // On ne retente QUE les requêtes sûres (GET) : rejouer un POST/PUT/
+    // DELETE à l'aveugle est dangereux quand on ne sait pas si la
+    // première tentative a bien atteint le serveur (risque de créer
+    // un doublon, par ex. un dossier soumis deux fois).
+    const methode = (options.method || "GET").toUpperCase();
+    const estSure = methode === "GET" || methode === "HEAD";
+    if (estSure && tentative < DELAIS_RETRY_MS.length) {
       notifierRetry(true);
       await attendre(DELAIS_RETRY_MS[tentative]);
       return request<T>(path, options, tentative + 1);
     }
     notifierRetry(false);
     throw new Error(
-      "Impossible de joindre le serveur après plusieurs tentatives. Vérifiez votre connexion et réessayez."
+      "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez dans quelques secondes."
     );
   }
   if (tentative > 0) notifierRetry(false);
