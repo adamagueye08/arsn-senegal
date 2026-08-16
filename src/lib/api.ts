@@ -271,6 +271,17 @@ export const api = {
   },
   admin: {
     dashboard: () => request<DashboardStats>("/admin/dashboard"),
+    exporterRapport: (
+      format: "xlsx" | "pdf",
+      filtres: { dateDebut?: string; dateFin?: string; typeAutorisationId?: string; statut?: string; etablissement?: string }
+    ) => {
+      const query = new URLSearchParams();
+      Object.entries(filtres).forEach(([k, v]) => {
+        if (v) query.set(k, v);
+      });
+      const qs = query.toString();
+      return downloadFile(`/admin/rapports/export.${format}${qs ? `?${qs}` : ""}`, `rapport-arsn.${format}`);
+    },
     listerDemandes: (params?: { q?: string; statut?: string }) => {
       const query = new URLSearchParams();
       if (params?.q) query.set("q", params.q);

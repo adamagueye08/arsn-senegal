@@ -76,7 +76,7 @@ function Page() {
 }
 
 function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => void }) {
-  const [tab, setTab] = useState<"demandes" | "utilisateurs" | "types">("demandes");
+  const [tab, setTab] = useState<"demandes" | "utilisateurs" | "types" | "rapports">("demandes");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [demandes, setDemandes] = useState<DemandeAdmin[]>([]);
   const [q, setQ] = useState("");
@@ -152,7 +152,17 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
             Types d'autorisation
           </button>
         )}
+        <button
+          onClick={() => setTab("rapports")}
+          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
+            tab === "rapports" ? "border-arsn-green text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Rapports
+        </button>
       </div>
+
+      {tab === "rapports" && <RapportsPanel />}
 
       {tab === "demandes" && (
       <div className="space-y-8 animate-reveal">
@@ -625,6 +635,126 @@ function DemandeAdminPanel({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function RapportsPanel() {
+  const [types, setTypes] = useState<TypeAutorisation[]>([]);
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
+  const [typeAutorisationId, setTypeAutorisationId] = useState("");
+  const [statut, setStatut] = useState("");
+  const [etablissement, setEtablissement] = useState("");
+  const [exportingFormat, setExportingFormat] = useState<"xlsx" | "pdf" | null>(null);
+
+  useEffect(() => {
+    api.typesAutorisation.lister().then(setTypes).catch(() => {});
+  }, []);
+
+  async function handleExport(format: "xlsx" | "pdf") {
+    setExportingFormat(format);
+    try {
+      await api.admin.exporterRapport(format, { dateDebut, dateFin, typeAutorisationId, statut, etablissement });
+    } catch (err: any) {
+      toast.error("Export impossible", { description: String(err.message || err) });
+    } finally {
+      setExportingFormat(null);
+    }
+  }
+
+  return (
+    <div className="space-y-6 animate-reveal">
+      <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg space-y-5">
+        <h3 className="text-sm font-mono uppercase tracking-[0.2em]">Filtres</h3>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
+              Date de dépôt — du
+            </label>
+            <input
+              type="date"
+              value={dateDebut}
+              onChange={(e) => setDateDebut(e.target.value)}
+              className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
+              Date de dépôt — au
+            </label>
+            <input
+              type="date"
+              value={dateFin}
+              onChange={(e) => setDateFin(e.target.value)}
+              className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
+              Type de demande
+            </label>
+            <select
+              value={typeAutorisationId}
+              onChange={(e) => setTypeAutorisationId(e.target.value)}
+              className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+            >
+              <option value="">Tous les types</option>
+              {types.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.nom}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
+              Statut
+            </label>
+            <select
+              value={statut}
+              onChange={(e) => setStatut(e.target.value)}
+              className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+            >
+              <option value="">Tous les statuts</option>
+              {Object.entries(STATUT_LABELS).map(([val, label]) => (
+                <option key={val} value={val}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground mb-2">
+              Établissement
+            </label>
+            <input
+              type="text"
+              value={etablissement}
+              onChange={(e) => setEtablissement(e.target.value)}
+              placeholder="Nom de l'établissement…"
+              className="w-full border border-border bg-white px-3 py-2 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-arsn-blue/40"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            disabled={exportingFormat !== null}
+            onClick={() => handleExport("xlsx")}
+            className="px-5 py-2.5 bg-arsn-green text-white text-sm font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200 active:scale-[0.98]"
+          >
+            {exportingFormat === "xlsx" ? "Export en cours…" : "Exporter en Excel"}
+          </button>
+          <button
+            disabled={exportingFormat !== null}
+            onClick={() => handleExport("pdf")}
+            className="px-5 py-2.5 bg-arsn-blue text-white text-sm font-semibold rounded-lg disabled:opacity-50 hover:opacity-90 transition-all duration-200 active:scale-[0.98]"
+          >
+            {exportingFormat === "pdf" ? "Export en cours…" : "Exporter en PDF"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
