@@ -271,6 +271,25 @@ export const api = {
   },
   admin: {
     dashboard: () => request<DashboardStats>("/admin/dashboard"),
+    statsRapport: (filtres: {
+      dateDebut?: string;
+      dateFin?: string;
+      typeAutorisationId?: string;
+      statut?: string;
+      etablissement?: string;
+    }) => {
+      const query = new URLSearchParams();
+      Object.entries(filtres).forEach(([k, v]) => {
+        if (v) query.set(k, v);
+      });
+      const qs = query.toString();
+      return request<{
+        total: number;
+        parStatut: { statut: string; label: string; count: number }[];
+        parType: { type: string; count: number }[];
+        parMois: { mois: string; count: number }[];
+      }>(`/admin/rapports/stats${qs ? `?${qs}` : ""}`);
+    },
     exporterRapport: (
       format: "xlsx" | "pdf",
       filtres: { dateDebut?: string; dateFin?: string; typeAutorisationId?: string; statut?: string; etablissement?: string }

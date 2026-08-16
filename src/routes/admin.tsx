@@ -14,6 +14,21 @@ import {
 } from "@/lib/api";
 import { FormDataReview } from "@/components/forms/FormDataReview";
 import { Skeleton, SkeletonRows, SkeletonPanel } from "@/components/site/Skeleton";
+import {
+  BarChart as RechartsBarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -123,10 +138,10 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
         </button>
       </div>
 
-      <div className="flex gap-2 border-b border-border">
+      <div className="flex gap-2 border-b border-border overflow-x-auto arsn-no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
         <button
           onClick={() => setTab("demandes")}
-          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
+          className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
             tab === "demandes" ? "border-arsn-green text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -135,7 +150,7 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
         {user.role === "SUPER_ADMIN" && (
           <button
             onClick={() => setTab("utilisateurs")}
-            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
+            className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
               tab === "utilisateurs" ? "border-arsn-green text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -145,7 +160,7 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
         {user.role === "SUPER_ADMIN" && (
           <button
             onClick={() => setTab("types")}
-            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
+            className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
               tab === "types" ? "border-arsn-green text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -154,7 +169,7 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
         )}
         <button
           onClick={() => setTab("rapports")}
-          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
+          className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm font-semibold border-b-2 transition-colors duration-200 ${
             tab === "rapports" ? "border-arsn-green text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -639,6 +654,8 @@ function DemandeAdminPanel({
   );
 }
 
+const COULEURS_GRAPHIQUE = ["#1D3557", "#2A9D8F", "#E9C46A", "#E76F51", "#457B9D", "#A8DADC"];
+
 function RapportsPanel() {
   const [types, setTypes] = useState<TypeAutorisation[]>([]);
   const [dateDebut, setDateDebut] = useState("");
@@ -647,15 +664,34 @@ function RapportsPanel() {
   const [statut, setStatut] = useState("");
   const [etablissement, setEtablissement] = useState("");
   const [exportingFormat, setExportingFormat] = useState<"xlsx" | "pdf" | null>(null);
+  const [stats, setStats] = useState<{
+    total: number;
+    parStatut: { statut: string; label: string; count: number }[];
+    parType: { type: string; count: number }[];
+    parMois: { mois: string; count: number }[];
+  } | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  const filtres = { dateDebut, dateFin, typeAutorisationId, statut, etablissement };
 
   useEffect(() => {
     api.typesAutorisation.lister().then(setTypes).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    setLoadingStats(true);
+    api.admin
+      .statsRapport(filtres)
+      .then(setStats)
+      .catch(() => {})
+      .finally(() => setLoadingStats(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateDebut, dateFin, typeAutorisationId, statut, etablissement]);
+
   async function handleExport(format: "xlsx" | "pdf") {
     setExportingFormat(format);
     try {
-      await api.admin.exporterRapport(format, { dateDebut, dateFin, typeAutorisationId, statut, etablissement });
+      await api.admin.exporterRapport(format, filtres);
     } catch (err: any) {
       toast.error("Export impossible", { description: String(err.message || err) });
     } finally {
@@ -755,6 +791,64 @@ function RapportsPanel() {
           </button>
         </div>
       </div>
+
+      {loadingStats ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          <Skeleton className="h-72 w-full" />
+          <Skeleton className="h-72 w-full" />
+        </div>
+      ) : !stats || stats.total === 0 ? (
+        <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg text-sm text-muted-foreground text-center">
+          Aucune donnée pour ces filtres.
+        </div>
+      ) : (
+        <>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg min-w-0">
+              <h4 className="text-sm font-mono uppercase tracking-[0.15em] mb-4">Dossiers par statut</h4>
+              <ResponsiveContainer width="100%" height={260}>
+                <RechartsBarChart data={stats.parStatut}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" name="Dossiers" fill="#1D3557" radius={[4, 4, 0, 0]} />
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg min-w-0">
+              <h4 className="text-sm font-mono uppercase tracking-[0.15em] mb-4">Répartition par type</h4>
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie data={stats.parType} dataKey="count" nameKey="type" cx="50%" cy="50%" outerRadius={90} label>
+                    {stats.parType.map((_, i) => (
+                      <Cell key={i} fill={COULEURS_GRAPHIQUE[i % COULEURS_GRAPHIQUE.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {stats.parMois.length > 1 && (
+            <div className="p-6 bg-white ring-1 ring-black/5 rounded-lg min-w-0">
+              <h4 className="text-sm font-mono uppercase tracking-[0.15em] mb-4">Évolution des dépôts</h4>
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={stats.parMois}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                  <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="count" name="Dossiers déposés" stroke="#2A9D8F" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

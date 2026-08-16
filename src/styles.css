@@ -301,3 +301,13 @@
   }
    #lovable-badge { display: none !important; }
 }
+
+/* Masque la scrollbar d'un conteneur scrollable horizontalement
+   (onglets, rails d'étapes) tout en gardant le défilement fonctionnel. */
+.arsn-no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.arsn-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
