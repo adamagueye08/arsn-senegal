@@ -409,7 +409,7 @@ function DemandeAdminPanel({
   async function handleTelechargerPiece(pieceId: string, nomFichier: string) {
     setDownloadingId(pieceId);
     try {
-      await api.demandes.telechargerPiece(demandeId, pieceId, nomFichier);
+      await api.demandes.telechargerPiece(demandeId, pieceId);
     } catch (err: any) {
       toast.error("Téléchargement impossible", { description: String(err.message || err) });
     } finally {
@@ -420,7 +420,7 @@ function DemandeAdminPanel({
   async function handleTelechargerAttestation() {
     setDownloadingId("attestation");
     try {
-      await api.demandes.telechargerAttestation(demandeId, detail?.autorisation?.pdfNomFichier || undefined);
+      await api.demandes.telechargerAttestation(demandeId);
     } catch (err: any) {
       toast.error("Téléchargement impossible", { description: String(err.message || err) });
     } finally {

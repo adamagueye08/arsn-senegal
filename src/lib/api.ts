@@ -95,29 +95,11 @@ export function reveillerServeur() {
   fetch(`${API_URL}/health`).catch(() => {});
 }
 
-async function downloadFile(path: string, filenameFallback: string) {
+function ouvrirTelechargement(path: string) {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!res.ok) {
-    const erreur = await res.json().catch(() => ({ erreur: res.statusText }));
-    throw new Error(
-      typeof erreur.erreur === "string" ? erreur.erreur : JSON.stringify(erreur.erreur ?? "Téléchargement impossible")
-    );
-  }
-  const blob = await res.blob();
-  const cd = res.headers.get("Content-Disposition");
-  const match = cd?.match(/filename="?([^"]+)"?/);
-  const filename = match ? match[1] : filenameFallback;
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  const separateur = path.includes("?") ? "&" : "?";
+  const url = `${API_URL}${path}${separateur}token=${encodeURIComponent(token ?? "")}`;
+  window.open(url, "_blank");
 }
 
 export interface FormFieldDef {
@@ -237,10 +219,9 @@ export const api = {
       request<Demande>(`/demandes/${id}`, { method: "PUT", body: JSON.stringify({ donnees }) }),
     soumettre: (id: string) => request<Demande>(`/demandes/${id}/submit`, { method: "POST" }),
     supprimer: (id: string) => request<void>(`/demandes/${id}`, { method: "DELETE" }),
-    telechargerPiece: (demandeId: string, pieceId: string, nomFichier: string) =>
-      downloadFile(`/demandes/${demandeId}/pieces/${pieceId}/telecharger`, nomFichier),
-    telechargerAttestation: (demandeId: string, nomFichier?: string) =>
-      downloadFile(`/demandes/${demandeId}/attestation`, nomFichier || "attestation.pdf"),
+    telechargerPiece: (demandeId: string, pieceId: string) =>
+      ouvrirTelechargement(`/demandes/${demandeId}/pieces/${pieceId}/telecharger`),
+    telechargerAttestation: (demandeId: string) => ouvrirTelechargement(`/demandes/${demandeId}/attestation`),
     repondreComplement: (id: string, donnees: Record<string, unknown>, commentaire?: string) =>
       request<Demande>(`/demandes/${id}/complement`, {
         method: "POST",
@@ -299,7 +280,7 @@ export const api = {
         if (v) query.set(k, v);
       });
       const qs = query.toString();
-      return downloadFile(`/admin/rapports/export.${format}${qs ? `?${qs}` : ""}`, `rapport-arsn.${format}`);
+      return ouvrirTelechargement(`/admin/rapports/export.${format}${qs ? `?${qs}` : ""}`);
     },
     listerDemandes: (params?: { q?: string; statut?: string }) => {
       const query = new URLSearchParams();
