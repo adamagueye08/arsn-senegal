@@ -306,7 +306,14 @@ function DemandeRow({
           onClick={onToggle}
           className="flex-1 flex items-center justify-between gap-2 p-4 text-sm hover:bg-secondary/40 transition-colors duration-200 text-left min-w-0"
         >
-          <span className="font-mono shrink-0">{demande.numero}</span>
+          <span className="shrink-0 text-left">
+            <span className="font-mono block">{demande.numero}</span>
+            <span className="text-[11px] text-muted-foreground block">
+              {new Date(demande.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+              {" à "}
+              {new Date(demande.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </span>
           <span className="text-muted-foreground truncate min-w-0 flex-1 text-center">
             {demande.typeAutorisation?.nom}
           </span>

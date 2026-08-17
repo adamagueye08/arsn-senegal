@@ -252,6 +252,14 @@ function Dashboard({ user, onLogout }: { user: ConnectedUser; onLogout: () => vo
                       <div className="font-mono">{d.numero}</div>
                       <div className="text-xs text-muted-foreground">{d.typeAutorisation?.nom}</div>
                     </div>
+                    <div className="min-w-[120px]">
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(d.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(d.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    </div>
                     <div className="min-w-[160px]">
                       <div>{d.demandeur?.prenom} {d.demandeur?.nom}</div>
                       <div className="text-xs text-muted-foreground">{d.demandeur?.organisation || d.demandeur?.email}</div>
