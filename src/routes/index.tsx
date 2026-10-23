@@ -30,8 +30,6 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const HERO_SLIDES = ["hero-1", "hero-2", "news-radiology", "news-visit"] as const;
-
 const TAXONOMY = [
   { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc", img: "section-reglementation" },
   { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc", img: "section-inspection" },
@@ -46,19 +44,15 @@ function Home() {
     <div>
       {/* Hero plein écran — occupe tout l'écran avant le scroll */}
       <section className="relative w-full min-h-[88vh] flex items-end overflow-hidden">
-        {HERO_SLIDES.map((name, i) => (
-          <img
-            key={name}
-            {...responsiveImage(name, "100vw")}
-            alt=""
-            aria-hidden={i !== 0}
-            loading={i === 0 ? "eager" : "lazy"}
-            fetchPriority={i === 0 ? "high" : "auto"}
-            decoding="async"
-            className="arsn-hero-slide absolute inset-0 w-full h-full object-cover"
-            style={{ animationDelay: `${-(i * 6)}s` }}
-          />
-        ))}
+        <img
+          {...responsiveImage("news-visit", "100vw")}
+          alt=""
+          aria-hidden
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover object-[center_25%]"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full pb-16 md:pb-24">
