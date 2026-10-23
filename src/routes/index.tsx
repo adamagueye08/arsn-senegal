@@ -45,7 +45,7 @@ function Home() {
       {/* Hero plein écran — occupe tout l'écran avant le scroll */}
       <section className="relative w-full min-h-[88vh] flex items-end overflow-hidden">
         <img
-          src="https://arsn.sn/wp-content/uploads/2024/12/mission2-1024x553.jpg"
+          src="https://res.cloudinary.com/wvwvyprh/image/upload/f_auto,q_auto/IMG_0092"
           alt=""
           aria-hidden
           loading="eager"
@@ -111,14 +111,9 @@ function Home() {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16">
-        {/* Chiffres clés (tableau de bord public) */}
         <PublicStats />
-
-        {/* Actualités défilantes */}
         <NewsSlider />
 
-
-        {/* Quick Access */}
         <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16 md:mb-20 animate-reveal">
           {TAXONOMY.map((item) => (
             <Link
@@ -150,9 +145,7 @@ function Home() {
           ))}
         </section>
 
-        {/* News + Sidebar */}
         <section className="grid lg:grid-cols-12 gap-8 lg:gap-12 animate-reveal">
-          {/* News */}
           <div className="lg:col-span-8">
             <div className="flex justify-between items-end mb-8 border-b border-border pb-4">
               <h4 className="text-xl font-serif font-bold">{t("home.news.title")}</h4>
@@ -171,7 +164,6 @@ function Home() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="lg:col-span-4 space-y-12">
             <div className="bg-foreground text-white p-8 rounded-sm">
               <h4 className="text-sm font-mono uppercase tracking-[0.2em] mb-6 border-b border-white/10 pb-4">
@@ -205,7 +197,7 @@ function Home() {
               <h4 className="text-sm font-mono uppercase tracking-[0.2em] border-b border-border pb-4">
                 {t("home.downloads.title")}
               </h4>
-              {( 
+              {(
                 [
                   { k: "rep.1", doc: DOCS.rapportAnnuel },
                   { k: "rep.2", doc: DOCS.rapportInspection },
@@ -236,7 +228,6 @@ function Home() {
                   <Download className="w-4 h-4 text-muted-foreground group-hover:text-arsn-blue shrink-0" />
                 </a>
               ))}
-
             </div>
           </div>
         </section>
@@ -252,7 +243,6 @@ function useCountUp(target: number, durationMs = 1500) {
     const start = performance.now();
     function tick(now: number) {
       const progress = Math.min((now - start) / durationMs, 1);
-      // easeOutCubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.round(eased * target));
       if (progress < 1) raf = requestAnimationFrame(tick);
@@ -266,7 +256,6 @@ function useCountUp(target: number, durationMs = 1500) {
 function PublicStats() {
   const { lang } = useLang();
 
-  // Chiffres approximatifs — pas encore de statistiques officielles publiables.
   const items = [
     { target: 50, label: lang === "en" ? "Licences issued" : "Autorisations délivrées" },
     { target: 100, label: lang === "en" ? "Applications processed" : "Dossiers traités" },
