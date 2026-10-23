@@ -45,7 +45,7 @@ function Home() {
       {/* Hero plein écran — occupe tout l'écran avant le scroll */}
       <section className="relative w-full min-h-[88vh] flex items-end overflow-hidden">
         <img
-          {...responsiveImage("news-visit", "100vw")}
+          src="https://arsn.sn/wp-content/uploads/2024/12/mission2-1024x553.jpg"
           alt=""
           aria-hidden
           loading="eager"
@@ -85,14 +85,14 @@ function Home() {
             >
               <Link
                 to="/espace-demandeur"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-arsn-blue text-white font-semibold text-sm rounded-lg hover:opacity-90 hover:shadow-lg hover:shadow-arsn-blue/30 transition-all duration-200 active:scale-[0.98]"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-arsn-blue text-white font-semibold text-sm rounded-lg hover:opacity-90 hover:shadow-lg hover:shadow-arsn-blue/30 transition-all duration-200"
               >
                 <ClipboardList className="w-4 h-4" />
                 {t("nav.hero.reqAuth")}
               </Link>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 backdrop-blur-sm ring-1 ring-white/40 text-white font-semibold text-sm rounded-lg hover:bg-white/20 transition-all duration-200 active:scale-[0.98]"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 backdrop-blur-sm ring-1 ring-white/40 text-white font-semibold text-sm rounded-lg hover:bg-white/20 transition-all duration-200"
               >
                 <ShieldAlert className="w-4 h-4" />
                 {t("nav.hero.reportIncident")}
@@ -205,7 +205,7 @@ function Home() {
               <h4 className="text-sm font-mono uppercase tracking-[0.2em] border-b border-border pb-4">
                 {t("home.downloads.title")}
               </h4>
-              {(
+              {( 
                 [
                   { k: "rep.1", doc: DOCS.rapportAnnuel },
                   { k: "rep.2", doc: DOCS.rapportInspection },
