@@ -84,10 +84,12 @@ export function SiteHeader() {
         <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="/LOGO-ARSN-1-2048x645.png"
+              src="/logo-arsn-220.webp"
+              srcSet="/logo-arsn-220.webp 1x, /logo-arsn-440.webp 2x"
               alt="Logo ARSN"
-              width={160}
+              width={178}
               height={56}
+              fetchPriority="high"
               className="h-12 md:h-14 w-auto object-contain"
             />
             <span className="sr-only">ARSN — Autorité Sénégalaise de Radioprotection et de Sûreté Nucléaire</span>

@@ -96,7 +96,8 @@ function Page() {
             >
               <div className="aspect-video bg-foreground rounded-sm relative overflow-hidden ring-1 ring-black/5">
                 <img
-                  src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`}
+                  src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+                  decoding="async"
                   alt=""
                   loading="lazy"
                   className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"

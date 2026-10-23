@@ -4,15 +4,7 @@ import { ArrowRight, FileText, Download, ShieldAlert, ClipboardList, ChevronDown
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import heroLabFull from "@/assets/hero-lab-full.jpg";
-import sectionReglementation from "@/assets/section-reglementation.jpg";
-import sectionInspection from "@/assets/section-inspection.jpg";
-import sectionDosimetrie from "@/assets/section-dosimetrie.jpg";
-import sectionVideotheque from "@/assets/section-videotheque.jpg";
-import heroLab from "@/assets/hero-lab.jpg";
-import newsConference from "@/assets/news-conference.jpg";
-import newsVisit from "@/assets/news-visit.jpg";
-import newsRadiology from "@/assets/news-radiology.jpg";
+import { responsiveImage } from "@/lib/images";
 import { NewsSlider } from "@/components/site/NewsSlider";
 import { DOCS, formatSize, type DocMeta } from "@/lib/documents";
 
@@ -38,11 +30,13 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const HERO_SLIDES = ["hero-1", "hero-2", "news-radiology", "news-visit"] as const;
+
 const TAXONOMY = [
-  { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc", img: sectionReglementation },
-  { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc", img: sectionInspection },
-  { n: "03", to: "/dosimetrie", key: "nav.dosimetry", descKey: "tax.dosimetry.desc", img: sectionDosimetrie },
-  { n: "04", to: "/videotheque", key: "nav.videotheque", descKey: "tax.videotheque.desc", img: sectionVideotheque },
+  { n: "01", to: "/reglementation", key: "nav.regulation", descKey: "tax.regulation.desc", img: "section-reglementation" },
+  { n: "02", to: "/inspection", key: "nav.inspection", descKey: "tax.inspection.desc", img: "section-inspection" },
+  { n: "03", to: "/dosimetrie", key: "nav.dosimetry", descKey: "tax.dosimetry.desc", img: "section-dosimetrie" },
+  { n: "04", to: "/videotheque", key: "nav.videotheque", descKey: "tax.videotheque.desc", img: "section-videotheque" },
 ] as const;
 
 function Home() {
@@ -52,12 +46,15 @@ function Home() {
     <div>
       {/* Hero plein écran — occupe tout l'écran avant le scroll */}
       <section className="relative w-full min-h-[88vh] flex items-end overflow-hidden">
-        {[heroLabFull, heroLab, newsRadiology, newsVisit].map((src, i) => (
+        {HERO_SLIDES.map((name, i) => (
           <img
-            key={src}
-            src={src}
+            key={name}
+            {...responsiveImage(name, "100vw")}
             alt=""
             aria-hidden={i !== 0}
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchPriority={i === 0 ? "high" : "auto"}
+            decoding="async"
             className="arsn-hero-slide absolute inset-0 w-full h-full object-cover"
             style={{ animationDelay: `${-(i * 6)}s` }}
           />
@@ -136,9 +133,11 @@ function Home() {
               className="relative overflow-hidden rounded-lg ring-1 ring-black/5 group block h-72"
             >
               <img
-                src={item.img}
+                {...responsiveImage(item.img, "(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw")}
                 alt=""
                 aria-hidden
+                loading="lazy"
+                decoding="async"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/25 transition-colors duration-300 group-hover:from-black" />
@@ -171,10 +170,10 @@ function Home() {
               </Link>
             </div>
             <div className="grid md:grid-cols-2 gap-8">
-              <NewsCard image={newsConference} n={1} />
-              <NewsCard image={newsVisit} n={2} />
-              <NewsCard image={newsRadiology} n={3} />
-              <NewsCard image={newsConference} n={4} />
+              <NewsCard image="news-conference" n={1} />
+              <NewsCard image="news-visit" n={2} />
+              <NewsCard image="news-radiology" n={3} />
+              <NewsCard image="news-conference" n={4} />
             </div>
           </div>
 
@@ -354,9 +353,10 @@ function NewsCard({ image, n }: { image: string; n: 1 | 2 | 3 | 4 }) {
       <article className="space-y-4 group cursor-pointer">
         <div className="w-full aspect-video overflow-hidden rounded-sm bg-slate-100">
           <img
-            src={image}
+            {...responsiveImage(image, "(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw")}
             alt=""
             loading="lazy"
+            decoding="async"
             width={600}
             height={400}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

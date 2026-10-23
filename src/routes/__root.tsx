@@ -99,8 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Accueil — ARSN Sénégal" },
       { name: "twitter:description", content: "Portail officiel de l'Autorité Sénégalaise de Radioprotection, de Sûreté et de Sécurité Nucléaires : actualités, avis, décisions et rapports." },
-      { property: "og:image", content: "/arsn-logo.png" },
-      { name: "twitter:image", content: "/arsn-logo.png" },
+      { property: "og:image", content: "/LOGO-ARSN-1-2048x645.png" },
+      { name: "twitter:image", content: "/LOGO-ARSN-1-2048x645.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -2,15 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLang } from "@/lib/i18n";
-import newsConference from "@/assets/news-conference.jpg";
-import newsVisit from "@/assets/news-visit.jpg";
-import newsRadiology from "@/assets/news-radiology.jpg";
+import { responsiveImage } from "@/lib/images";
 
 const SLIDES = [
-  { image: newsConference, n: 1 },
-  { image: newsVisit, n: 2 },
-  { image: newsRadiology, n: 3 },
-  { image: newsConference, n: 4 },
+  { image: "news-conference", n: 1 },
+  { image: "news-visit", n: 2 },
+  { image: "news-radiology", n: 3 },
+  { image: "news-conference", n: 4 },
 ] as const;
 
 export function NewsSlider() {
@@ -46,8 +44,10 @@ export function NewsSlider() {
             aria-hidden={i !== idx}
           >
             <img
-              src={s.image}
+              {...responsiveImage(s.image, "(min-width: 1280px) 1216px, 100vw")}
               alt=""
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover opacity-55"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-arsn-blue/90 via-arsn-blue/70 to-transparent" />

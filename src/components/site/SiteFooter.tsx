@@ -10,10 +10,12 @@ export function SiteFooter() {
           <div className="lg:col-span-2">
             <div className="mb-6">
               <img
-                src="/LOGO-ARSN-1-2048x645.png"
+                src="/logo-arsn-220.webp"
+                srcSet="/logo-arsn-220.webp 1x, /logo-arsn-440.webp 2x"
                 alt="Logo ARSN"
-                width={220}
-                height={72}
+                width={203}
+                height={64}
+                loading="lazy"
                 className="h-16 w-auto object-contain"
               />
             </div>
