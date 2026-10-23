@@ -45,7 +45,7 @@ function Home() {
       {/* Hero plein écran — occupe tout l'écran avant le scroll */}
       <section className="relative w-full min-h-[88vh] flex items-end overflow-hidden">
         <img
-          src="https://res.cloudinary.com/wvwvyprh/image/upload/f_auto,q_auto/IMG_0092"
+          src="https://res.cloudinary.com/wvwvyprh/image/upload/c_fill,w_1800,h_1000,q_auto,f_auto/IMG_0092"
           alt=""
           aria-hidden
           loading="eager"
